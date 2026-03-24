@@ -56,6 +56,8 @@ More detail: **[mcp-servers/README.md](mcp-servers/README.md)** · **`orgwave/re
 
 ## How to run
 
+**Workspace root:** Use **File → Open Folder** on the **`orgwave-playbooks`** directory itself. If you open a parent folder (e.g. a folder that contains many projects), Cursor will **not** load this repo’s **`.cursor/mcp.json`**, so **GitHub MCP** will not appear under **Tools & MCP**—see **[orgwave/required-mcp.md](orgwave/required-mcp.md)** (*GitHub MCP missing in Cursor*).
+
 | Path | When to use |
 |------|-------------|
 | **Cursor Agent** | Real migrations: multi-file edits, judgment, tests. Open this repo, use the orchestrator rule, name a playbook from `orgwave/catalog.yaml`. |

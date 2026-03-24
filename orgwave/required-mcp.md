@@ -59,3 +59,18 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 2. Run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
 3. Update **`orgwave/required-mcp.md`** tables if the default set changes.
 4. If deeplink wording must change, edit **`build_prompt()`** in `orgwave/scripts/generate-orgwave-deeplink.py` and run **`python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`**.
+
+## GitHub MCP missing in Cursor
+
+**Symptom:** **Tools & MCP** lists other servers (e.g. Grafana, New Relic) but **no `github`** entry, or the agent never sees GitHub MCP tools.
+
+**Cause:** Cursor reads **project** MCP from **`.cursor/mcp.json` in the workspace root**. Running OrgWave with the workspace opened on a **parent folder** (multi-project tree, monorepo root, or `IdeaProjects`) does **not** load **orgwave-playbooks**’s `.cursor/mcp.json`, so **GitHub MCP is never started**. Playbooks also **cannot** create that connection at runtime—it is configuration, not something the agent registers by following `SKILL.md`.
+
+**Fix:**
+
+1. **File → Open Folder** and choose the **`orgwave-playbooks`** directory itself (the folder that contains **`orgwave/catalog.yaml`** and **`.cursor/mcp.json`**).
+2. **Command Palette → Developer: Reload Window** (or restart Cursor).
+3. Confirm **`.cursor/mcp.json`** contains **`mcpServers.github`**; if not, from repo root run **`python3 orgwave/scripts/build-mcp-json.py`** and reload again.
+4. Ensure **`GITHUB_TOKEN`** reaches the Cursor process (see **`mcp-servers/README.md`**) or use repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** per **`.env.example`**.
+
+After that, **github** should appear alongside any **user-level** MCP servers. Until then, OrgWave correctly falls back to **`gh`** or the GitHub REST API.

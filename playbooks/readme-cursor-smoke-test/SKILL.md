@@ -18,7 +18,8 @@ description: Test playbook — GitHub MCP (or gh), list repos you can push to, s
 
 ## 3. Discovery
 
-1. **Connect** using **GitHub MCP** when available (`mcp-servers/servers/` + `orgwave/required-mcp.md`); otherwise use **`gh`** — do not block on MCP.
+0. **MCP scope:** GitHub MCP is **not** started by this playbook. Cursor only loads it from **`.cursor/mcp.json`** when the **workspace root** is the **orgwave-playbooks** repo folder. If the user opened a parent directory, **Tools & MCP** may show only global/other servers—point them to **`orgwave/required-mcp.md`** (*GitHub MCP missing in Cursor*) and use **`gh`** or GitHub REST API + **`GITHUB_TOKEN`**; do not block.
+1. **Connect** using **GitHub MCP** when those tools are **actually available in the agent session** (`mcp-servers/servers/` + `orgwave/required-mcp.md`); otherwise use **`gh`** or the REST API — do not block on MCP.
 2. **List repositories** the token can **push** to, for the scope the user names (their user account, specific org(s), or “all my repos”):
    - Prefer GitHub MCP tools that list/search repos with permission metadata.
    - Fallback: e.g. `gh api user/repos --paginate` (and filter where `.permissions.push == true`), and/or `gh api user/orgs` + org repos with role allowing push — use judgment so the table only includes **push-capable** repos.
