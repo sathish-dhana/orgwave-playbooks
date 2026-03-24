@@ -7,6 +7,7 @@
         "-y",
         "@modelcontextprotocol/server-github"
       ],
+      "envFile": "${workspaceFolder}/.env",
       "env": {
         "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
       }

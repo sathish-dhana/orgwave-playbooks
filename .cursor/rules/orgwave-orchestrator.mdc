@@ -9,7 +9,7 @@ Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.y
 
 ## Flow
 
-1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config from those files. **Prefer** any MCP server whose tools work (env/token available to Cursor). **Never block OrgWave on MCP:** if MCP is missing, errors, or pending approval, **immediately** fall back to **`gh`** and/or **`discovery-output.json`** — do not stop the run to demand MCP setup.
+1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP expects **`GITHUB_TOKEN`** from the Cursor process environment (e.g. user **`export`** in **`~/.zshrc`** and launched Cursor **from a terminal** after `source ~/.zshrc`) or vars from repo **`.env`** via **`envFile`**. **Prefer** MCP when tools work; **never block OrgWave on MCP** — fall back to **`gh`** / **`discovery-output.json`** immediately if MCP fails.
 2. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
 3. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
 4. Discovery: MCP first when usable; else `gh` / JSON — no extra MCP config inside playbooks.

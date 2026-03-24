@@ -33,6 +33,27 @@ That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.
 
 Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 
+### Prerequisites — GitHub MCP (if you use it)
+
+`mcp-servers/servers/github.json` maps **`GITHUB_PERSONAL_ACCESS_TOKEN`** ← **`${env:GITHUB_TOKEN}`** and also loads optional repo-root **`.env`**. Cursor only sees variables from your **shell environment** if Cursor was started with that environment (e.g. from Terminal).
+
+**Recommended — `~/.zshrc` + launch Cursor from the terminal:**
+
+```bash
+# 1) Add once (replace the token; keep the line secret — do not commit)
+echo 'export GITHUB_TOKEN="ghp_YOUR_TOKEN_HERE"' >> ~/.zshrc
+
+# 2) Load into the current shell
+source ~/.zshrc
+
+# 3) Start Cursor from this terminal so MCP inherits GITHUB_TOKEN (macOS Dock icon often does not)
+open -a Cursor /path/to/orgwave-playbooks
+```
+
+**Optional — repo `.env` instead** (e.g. you always open Cursor from the Dock): copy **[`.env.example`](.env.example)** to **`.env`** at the repo root and set **`GITHUB_PERSONAL_ACCESS_TOKEN`**.
+
+More detail: **[mcp-servers/README.md](mcp-servers/README.md)** · **`orgwave/required-mcp.md`**.
+
 ## How to run
 
 | Path | When to use |
@@ -40,7 +61,7 @@ Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 | **Cursor Agent** | Real migrations: multi-file edits, judgment, tests. Open this repo, use the orchestrator rule, name a playbook from `orgwave/catalog.yaml`. |
 | **Run in Cursor** (deeplink) | Same with a [prefilled prompt](https://cursor.com/docs/reference/deeplinks). **[All playbooks → orgwave/docs/run-in-cursor.md](orgwave/docs/run-in-cursor.md)** |
 
-**Prerequisites:** Set env vars for each server (see **`_orgwave.env`** in `mcp-servers/servers/*.json`). **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional).
+**Also:** **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional). For MCP, see **Prerequisites — GitHub MCP** above.
 
 ```bash
 python3 orgwave/scripts/build-mcp-json.py

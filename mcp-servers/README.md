@@ -4,6 +4,27 @@
 
 **Repo layout:** update **playbooks** under `playbooks/`; update **MCP servers** here — keep concerns separate.
 
+## GitHub token (`GITHUB_TOKEN` + `~/.zshrc`)
+
+The **github** server uses **`${env:GITHUB_TOKEN}`** (see `servers/github.json`). That value is read from the **environment Cursor had when it started**, not from a URL when you click “Run in Cursor” on GitHub.
+
+1. Put the token in **`~/.zshrc`** (fix the path — it is **`.zshrc`**, not `.zhrc`):
+
+   ```bash
+   echo 'export GITHUB_TOKEN="ghp_YOUR_TOKEN_HERE"' >> ~/.zshrc
+   source ~/.zshrc
+   ```
+
+2. **Start Cursor from the same terminal** so the GUI inherits `GITHUB_TOKEN`:
+
+   ```bash
+   open -a Cursor /path/to/orgwave-playbooks
+   ```
+
+   If you only click the Cursor icon in the Dock, macOS often **does not** load `~/.zshrc` into that process — MCP will not see the token.
+
+**Optional:** repo-root **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** (copy **`.env.example`**). `github.json` sets **`envFile`** to **`${workspaceFolder}/.env`** as a fallback for tools that read the file directly.
+
 ## Add a server
 
 1. Create **`servers/<id>.json`** where **`<id>`** is the MCP server key Cursor uses (must match `server` in `~/.cursor/permissions.json` patterns like `<id>:*`).

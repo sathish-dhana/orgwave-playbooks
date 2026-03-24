@@ -1,0 +1,15 @@
+<!-- orgwave-generated -->
+# README Cursor smoke test
+
+Playbook id: `readme-cursor-smoke-test`
+
+[![Play — Run in Cursor](https://img.shields.io/badge/-Run_in_Cursor-22c55e?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTggNXYxNGwxMS03eiIvPjwvc3ZnPg%3D%3D)](https://cursor.com/link/prompt?text=You+are+running+OrgWave.+Use+the+%2A%2Aorgwave-playbooks%2A%2A+repository+as+the+Cursor+workspace.%0A%0A%2A%2AGit+workspace%3A%2A%2A+If+this+folder+is+not+open+yet%2C+clone+the+repo+%28or+ask+me+to+open+it%29.+If+it+is+already+the+workspace%2C+ensure+it+is+up+to+date%3A+%60git+fetch%60+and+fast-forward+or+%60git+pull%60+on+the+current+branch+%28prefer+latest+default+branch%29+unless+I+say+otherwise.%0A%0A%2A%2AMCP+%28non-blocking%29%3A%2A%2A+Read+%60orgwave%2Frequired-mcp.md%60+and+%2A%2A%60mcp-servers%2FREADME.md%60%2A%2A.+%2A%2A%60GITHUB_TOKEN%60%2A%2A+should+be+%2A%2A%60export%60%2A%2Aed+in+%2A%2A%60~%2F.zshrc%60%2A%2A+and+Cursor+started+%2A%2Afrom+a+terminal%2A%2A+%28after+%60source+~%2F.zshrc%60%29+so+MCP+inherits+it%3B+optional+repo+%2A%2A%60.env%60%2A%2A+for+%2A%2A%60GITHUB_PERSONAL_ACCESS_TOKEN%60%2A%2A.+%2A%2APrefer%2A%2A+MCP+when+tools+work%3B+otherwise+%2A%2A%60gh%60%2A%2A+%2F+%2A%2A%60discovery-output.json%60%2A%2A+%E2%80%94+never+block+the+playbook+on+MCP+setup.%0A%0A1.+Follow+%60.cursor%2Frules%2Forgwave-orchestrator.mdc%60+and+load+playbook+id+%60readme-cursor-smoke-test%60+from+%60orgwave%2Fcatalog.yaml%60+and+%60playbooks%2Freadme-cursor-smoke-test%2FSKILL.md%60.%0A2.+Ask+me+for+the+GitHub+org+if+unknown.+List%2Ffilter+repos+using+MCP+when+it+works%3B+otherwise+use+%60gh%60+or+discovery+JSON+without+delay.%0A3.+Show+a+numbered+table+of+candidate+services+and+STOP+until+I+select+which+repos+to+run.%0A4.+For+each+selected+service%3A+apply+the+playbook%2C+run+tests+if+applicable%2C+push+branches%2C+open+one+PR+per+service.+Do+not+merge.)
+
+Click the **play** button to open Cursor with this playbook’s prompt prefilled — you still confirm before the agent runs.
+
+- Agent instructions: **[SKILL.md](SKILL.md)**
+- All playbooks: **[orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md)**
+
+---
+
+*Auto-generated from `orgwave/catalog.yaml` — do not edit. Regenerate with* `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*

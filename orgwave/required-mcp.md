@@ -26,13 +26,13 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 
 | Step | Why |
 |------|-----|
-| **Secrets** | Set env vars named in each server’s **`_orgwave.env`** (see `mcp-servers/servers/*.json`). |
+| **Secrets** | **GitHub:** `export GITHUB_TOKEN=…` in **`~/.zshrc`**, then **`source ~/.zshrc`** and **start Cursor from that terminal** so MCP sees it; or optional repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** (see **`.env.example`**). Deeplinks cannot inject tokens. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
 | **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |
 
 ### If you already set tokens — is it “auto”?
 
-When **`GITHUB_TOKEN`** (and any other declared vars) are visible to Cursor’s MCP process, matching servers should connect **without** a separate manual “connect” step — subject to Cursor and OS env inheritance (see earlier notes in git history / macOS Dock).
+When **`GITHUB_TOKEN`** is in the environment **of the Cursor process** (e.g. exported in **`~/.zshrc`** and Cursor launched **from a terminal** after `source ~/.zshrc`), GitHub MCP can start without extra steps. The macOS **Dock** icon often does **not** load `~/.zshrc` — use **`open -a Cursor …`** from that shell, or repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**.
 
 ### Can Auto-run be set from a prompt / this repo?
 

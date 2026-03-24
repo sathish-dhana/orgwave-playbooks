@@ -2,13 +2,17 @@
   "type": "stdio",
   "command": "npx",
   "args": ["-y", "@modelcontextprotocol/server-github"],
+  "envFile": "${workspaceFolder}/.env",
   "env": {
     "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
   },
   "_orgwave": {
     "title": "GitHub",
     "purpose": "List/filter org repos and GitHub metadata during OrgWave discovery.",
-    "env": ["GITHUB_TOKEN"],
+    "env": [
+      "GITHUB_TOKEN (recommended: export in ~/.zshrc; start Cursor from a terminal so MCP inherits it)",
+      "or GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (optional envFile fallback)"
+    ],
     "permissionsAllowlistHint": "github:*"
   }
 }

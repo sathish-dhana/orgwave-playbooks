@@ -12,7 +12,7 @@
 
 - **Policy:** [`../required-mcp.md`](../required-mcp.md).
 - **How to add servers:** [`../../mcp-servers/README.md`](../../mcp-servers/README.md) — one JSON file per server under [`../../mcp-servers/servers/`](../../mcp-servers/servers/).
-- **Merge script:** `python3 orgwave/scripts/build-mcp-json.py` → writes [`.cursor/mcp.json`](../../.cursor/mcp.json) ([Cursor project MCP](https://cursor.com/docs/context/mcp)). Tokens only via `${env:…}` / `_orgwave.env`, never committed.
+- **Merge script:** `python3 orgwave/scripts/build-mcp-json.py` → writes [`.cursor/mcp.json`](../../.cursor/mcp.json) ([Cursor project MCP](https://cursor.com/docs/context/mcp)). **GitHub:** `GITHUB_TOKEN` in **`~/.zshrc`** + launch Cursor from terminal, or optional [`.env`](../../.env.example) — never commit secrets.
 - **Agent behavior:** Prefer MCP when tools work; **never block** — fall back to `gh` / `discovery-output.json` per `required-mcp.md`.
 
 ---
