@@ -46,7 +46,7 @@ def build_prompt(playbook_id: str) -> str:
 
 **Git workspace:** If this folder is not open yet, clone the repo (or ask me to open it). If it is already the workspace, ensure it is up to date: `git fetch` and fast-forward or `git pull` on the current branch (prefer latest default branch) unless I say otherwise.
 
-**MCP (non-blocking):** Read `orgwave/required-mcp.md` and **`mcp-servers/README.md`**. **`GITHUB_TOKEN`** should be **`export`**ed in **`~/.zshrc`** and Cursor started **from a terminal** (after `source ~/.zshrc`) so MCP inherits it; optional repo **`.env`** for **`GITHUB_PERSONAL_ACCESS_TOKEN`**. **Prefer** MCP when tools work; otherwise **`gh`** / **`discovery-output.json`** — never block the playbook on MCP setup.
+**MCP (non-blocking):** Read `orgwave/required-mcp.md` and `mcp-servers/README.md`. Put `GITHUB_TOKEN` in `~/.zshrc` (export) and start Cursor from a terminal after `source ~/.zshrc`, or use repo `.env` for `GITHUB_PERSONAL_ACCESS_TOKEN`. Prefer MCP when it works; else use `gh` or discovery JSON. Do not block the playbook on MCP setup.
 
 1. Follow `.cursor/rules/orgwave-orchestrator.mdc` and load playbook id `{playbook_id}` from `orgwave/catalog.yaml` and `playbooks/{playbook_id}/SKILL.md`.
 2. Ask me for the GitHub org if unknown. List/filter repos using MCP when it works; otherwise use `gh` or discovery JSON without delay.
@@ -54,8 +54,16 @@ def build_prompt(playbook_id: str) -> str:
 4. For each selected service: apply the playbook, run tests if applicable, push branches, open one PR per service. Do not merge."""
 
 
+def _encode_prompt_query(playbook_id: str) -> str:
+    # quote_via=quote uses %20 for spaces; some Cursor builds mishandle + in query strings.
+    return urllib.parse.urlencode(
+        {"text": build_prompt(playbook_id)},
+        quote_via=urllib.parse.quote,
+    )
+
+
 def web_url(playbook_id: str) -> str:
-    q = urllib.parse.urlencode({"text": build_prompt(playbook_id)})
+    q = _encode_prompt_query(playbook_id)
     url = f"https://cursor.com/link/prompt?{q}"
     if len(url) > MAX_LEN:
         raise ValueError(f"URL length {len(url)} exceeds {MAX_LEN} for playbook {playbook_id!r}")
@@ -63,7 +71,7 @@ def web_url(playbook_id: str) -> str:
 
 
 def desktop_url(playbook_id: str) -> str:
-    q = urllib.parse.urlencode({"text": build_prompt(playbook_id)})
+    q = _encode_prompt_query(playbook_id)
     url = f"cursor://anysphere.cursor-deeplink/prompt?{q}"
     if len(url) > MAX_LEN:
         raise ValueError(f"Desktop URL length {len(url)} exceeds {MAX_LEN} for playbook {playbook_id!r}")
@@ -128,7 +136,7 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
             "",
             badge,
             "",
-            "Click the **play** button to open Cursor with this playbook’s prompt prefilled — you still confirm before the agent runs.",
+            "Click the **play** button to open Cursor with this playbook's prompt prefilled - you still confirm before the agent runs.",
             "",
             f"- Agent instructions: **[SKILL.md](SKILL.md)**",
             f"- All playbooks: **[orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md)**",
