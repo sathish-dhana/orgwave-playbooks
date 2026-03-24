@@ -77,6 +77,12 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 
 Official **`@modelcontextprotocol/server-github`** does not ship a “list my repos with `permissions.push`” tool. **`search_repositories`** can approximate discovery (e.g. `user:yourname`) but **push** filtering may still require **`GET /user/repos`** (REST) or **`gh`**. Execution steps (branch, file, PR) **should** use MCP when those tools are available.
 
+### GitHub CLI (`gh`) missing in the agent shell
+
+- **Often:** `gh` is not installed — install with **`brew install gh`** on macOS when Homebrew is present (agent may request network to run it).
+- **Or:** `gh` is installed under Homebrew but the agent’s **PATH** omits **`/opt/homebrew/bin`** or **`/usr/local/bin`** — use the full path to `gh` or export PATH for that command.
+- **Still use GitHub MCP** for file/branch/PR steps when tools exist in the session; use **`gh api …`** or REST for push-filtered repo lists when the playbook requires it.
+
 ## Enabling a disabled MCP server
 
 **Symptom:** The server **appears** under **Cursor Settings → Tools & MCP** (names may vary slightly by Cursor version), but it is **off**, **disabled**, or **not running** — so the agent gets **no tools** from that server even though **`mcp-servers/servers/<id>.json`** and **`.cursor/mcp.json`** are correct.

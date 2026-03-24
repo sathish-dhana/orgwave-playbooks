@@ -40,6 +40,9 @@ DEEPLINK_PROMPT_TEMPLATE = (
     "OrgWave: open orgwave-playbooks as workspace. "
     "Run orchestrator rule and playbook {playbook_id}. "
     "Read orgwave/catalog.yaml and playbooks/{playbook_id}/SKILL.md. "
+    "If gh is missing install it (e.g. brew install gh on macOS) or call /opt/homebrew/bin/gh when PATH omits Homebrew. "
+    "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file, branch, and PR steps; "
+    "use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
     "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
 )
 

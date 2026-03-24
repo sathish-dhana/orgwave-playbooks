@@ -21,6 +21,20 @@ Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.y
 3. **Discovery / push filter:** `@modelcontextprotocol/server-github` does **not** expose authenticated **`GET /user/repos`** with `permissions.push`. For a **push-only** candidate list, you may still use **`gh`** or **REST + `GITHUB_TOKEN`** after MCP attempts, or combine MCP **`search_repositories`** (e.g. `user:<login>`) with a clear note if push metadata is incomplete. Never block waiting for a non-existent MCP tool.
 4. **On MCP failure** (timeout, auth error, user skipped tool approval): retry once if reasonable, then fall back per policy—do not loop on MCP.
 
+### GitHub CLI (`gh`) — when the agent says it is “not available”
+
+Two common causes:
+
+1. **Not installed** — there is no `gh` binary (e.g. Homebrew never ran `brew install gh`).
+2. **PATH** — Cursor’s agent shell may not include Homebrew’s bin dir (`/opt/homebrew/bin` on Apple Silicon, `/usr/local/bin` on Intel macOS), so `gh` exists but `command -v gh` fails.
+
+**Agent policy (in order):**
+
+1. Resolve `gh`: run `command -v gh`; if missing, try **`/opt/homebrew/bin/gh`** and **`/usr/local/bin/gh`** explicitly.
+2. If still missing on macOS/Linux and **`brew`** is available, run **`brew install gh`** (needs network approval), then use the full path above or ensure PATH includes Homebrew’s `bin` for that shell session.
+3. **Prefer GitHub MCP** for operations that have a matching tool (branch, file content, PR, etc.); **`gh`** is mainly for **push-accurate discovery** (`gh api user/repos --paginate` + `.permissions.push`) when REST is not already in use.
+4. If install is impossible or declined, use **GitHub REST + `GITHUB_TOKEN`** (or **`discovery-output.json`**) — same as today; do not block the run.
+
 ## Flow
 
 1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP expects **`GITHUB_TOKEN`** from the Cursor process environment (e.g. user **`export`** in **`~/.zshrc`** and launched Cursor **from a terminal** after `source ~/.zshrc`) or vars from repo **`.env`** via **`envFile`**. Follow **MCP-first** above; **never block OrgWave on MCP** — fall back to **`gh`** / GitHub REST API / **`discovery-output.json`** if MCP is missing, disabled for the user, or fails.
