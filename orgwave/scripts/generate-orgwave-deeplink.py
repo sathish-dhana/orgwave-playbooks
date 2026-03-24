@@ -35,6 +35,14 @@ def _shields_run_badge_url() -> str:
 
 RUN_BUTTON_BADGE_IMAGE = _shields_run_badge_url()
 
+# Short plain-text only. Cursor may reject long prompts with markdown, backticks, or non-ASCII.
+DEEPLINK_PROMPT_TEMPLATE = (
+    "OrgWave: open orgwave-playbooks as workspace. "
+    "Run orchestrator rule and playbook {playbook_id}. "
+    "Read orgwave/catalog.yaml and playbooks/{playbook_id}/SKILL.md. "
+    "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
+)
+
 
 def run_in_cursor_badge(deeplink_url: str) -> str:
     """Common markdown for one Run-in-Cursor control (shields badge → deeplink)."""
@@ -42,24 +50,12 @@ def run_in_cursor_badge(deeplink_url: str) -> str:
 
 
 def build_prompt(playbook_id: str) -> str:
-    return f"""You are running OrgWave. Use the **orgwave-playbooks** repository as the Cursor workspace.
-
-**Git workspace:** If this folder is not open yet, clone the repo (or ask me to open it). If it is already the workspace, ensure it is up to date: `git fetch` and fast-forward or `git pull` on the current branch (prefer latest default branch) unless I say otherwise.
-
-**MCP (non-blocking):** Read `orgwave/required-mcp.md` and `mcp-servers/README.md`. Put `GITHUB_TOKEN` in `~/.zshrc` (export) and start Cursor from a terminal after `source ~/.zshrc`, or use repo `.env` for `GITHUB_PERSONAL_ACCESS_TOKEN`. Prefer MCP when it works; else use `gh` or discovery JSON. Do not block the playbook on MCP setup.
-
-1. Follow `.cursor/rules/orgwave-orchestrator.mdc` and load playbook id `{playbook_id}` from `orgwave/catalog.yaml` and `playbooks/{playbook_id}/SKILL.md`.
-2. Ask me for the GitHub org if unknown. List/filter repos using MCP when it works; otherwise use `gh` or discovery JSON without delay.
-3. Show a numbered table of candidate services and STOP until I select which repos to run.
-4. For each selected service: apply the playbook, run tests if applicable, push branches, open one PR per service. Do not merge."""
+    return DEEPLINK_PROMPT_TEMPLATE.format(playbook_id=playbook_id)
 
 
 def _encode_prompt_query(playbook_id: str) -> str:
-    # quote_via=quote uses %20 for spaces; some Cursor builds mishandle + in query strings.
-    return urllib.parse.urlencode(
-        {"text": build_prompt(playbook_id)},
-        quote_via=urllib.parse.quote,
-    )
+    # Match Cursor docs (Python example): plain urlencode. Prompt is kept short ASCII so + for spaces is fine.
+    return urllib.parse.urlencode({"text": build_prompt(playbook_id)})
 
 
 def web_url(playbook_id: str) -> str:
@@ -127,6 +123,7 @@ def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
 
 def playbook_readme_body(playbook_id: str, title: str) -> str:
     badge = run_in_cursor_badge(web_url(playbook_id))
+    paste_fallback = build_prompt(playbook_id)
     return "\n".join(
         [
             README_MARKER,
@@ -137,6 +134,12 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
             badge,
             "",
             "Click the **play** button to open Cursor with this playbook's prompt prefilled - you still confirm before the agent runs.",
+            "",
+            "If Cursor shows **invalid text for prompt**, paste this into Agent chat instead:",
+            "",
+            "```text",
+            paste_fallback,
+            "```",
             "",
             f"- Agent instructions: **[SKILL.md](SKILL.md)**",
             f"- All playbooks: **[orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md)**",
