@@ -2,14 +2,12 @@
   "mcpServers": {
     "github": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-github"
-      ],
+      "command": "${workspaceFolder}/orgwave/scripts/github-mcp-launch.sh",
+      "args": [],
       "envFile": "${workspaceFolder}/.env",
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+        "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
+        "GH_TOKEN": "${env:GH_TOKEN}"
       }
     }
   }

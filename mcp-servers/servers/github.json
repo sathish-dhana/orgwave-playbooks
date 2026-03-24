@@ -1,17 +1,19 @@
 {
   "type": "stdio",
-  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "command": "${workspaceFolder}/orgwave/scripts/github-mcp-launch.sh",
+  "args": [],
   "envFile": "${workspaceFolder}/.env",
   "env": {
-    "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+    "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
+    "GH_TOKEN": "${env:GH_TOKEN}"
   },
   "_orgwave": {
     "title": "GitHub",
     "purpose": "List/filter org repos and GitHub metadata during OrgWave discovery.",
     "env": [
-      "GITHUB_TOKEN (recommended: export in ~/.zshrc; start Cursor from a terminal so MCP inherits it)",
-      "or GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (optional envFile fallback)"
+      "GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (envFile), or",
+      "GITHUB_TOKEN or GH_TOKEN in the Cursor process env (e.g. ~/.zshrc + launch Cursor from that terminal), or",
+      "gh logged in (github-mcp-launch.sh runs `gh auth token` when no PAT vars are set)"
     ],
     "permissionsAllowlistHint": "github:*"
   }

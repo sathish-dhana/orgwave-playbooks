@@ -4,9 +4,18 @@
 
 **Repo layout:** update **playbooks** under `playbooks/`; update **MCP servers** here — keep concerns separate.
 
-## GitHub token (`GITHUB_TOKEN` + `~/.zshrc`)
+## GitHub token (MCP vs `gh`)
 
-The **github** server uses **`${env:GITHUB_TOKEN}`** (see `servers/github.json`). That value is read from the **environment Cursor had when it started**, not from a URL when you click “Run in Cursor” on GitHub.
+The **github** server runs **`orgwave/scripts/github-mcp-launch.sh`**, which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github` in this order:
+
+1. Already set (e.g. repo-root **`.env`** via **`envFile`** — copy **`.env.example`**).
+2. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
+3. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
+4. **`gh auth token`** if `gh` is installed and logged in (Homebrew paths are tried first).
+
+So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, export **`GITHUB_TOKEN`** or **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+
+### Recommended: `GITHUB_TOKEN` + `~/.zshrc`
 
 1. Put the token in **`~/.zshrc`** (fix the path — it is **`.zshrc`**, not `.zhrc`):
 
@@ -21,9 +30,9 @@ The **github** server uses **`${env:GITHUB_TOKEN}`** (see `servers/github.json`)
    open -a Cursor /path/to/orgwave-playbooks
    ```
 
-   If you only click the Cursor icon in the Dock, macOS often **does not** load `~/.zshrc` into that process — MCP will not see the token.
+   If you only click the Cursor icon in the Dock, macOS often **does not** load `~/.zshrc` into that process — use **`.env`** or ensure **`gh`** is logged in so the launch script can read a token.
 
-**Optional:** repo-root **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** (copy **`.env.example`**). `github.json` sets **`envFile`** to **`${workspaceFolder}/.env`** as a fallback for tools that read the file directly.
+**Windows:** the launch script is **bash** — use **Git Bash** / **WSL**, or rely on **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`** only (no `gh` fallback unless `gh` is on `PATH` in that environment).
 
 ## Add a server
 
