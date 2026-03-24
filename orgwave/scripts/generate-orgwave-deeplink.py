@@ -35,15 +35,17 @@ def _shields_run_badge_url() -> str:
 
 RUN_BUTTON_BADGE_IMAGE = _shields_run_badge_url()
 
-# Short plain-text only. Cursor may reject long prompts with markdown, backticks, or non-ASCII.
+# Short plain-text only. No backticks, semicolons in the body, or markdown — Cursor has known deeplink
+# parsing bugs (invalid text for prompt) with some characters and with + vs space encoding; see forum
+# e.g. https://forum.cursor.com/t/error-handling-deep-link-invalid-text-for-prompt/149270
 DEEPLINK_PROMPT_TEMPLATE = (
     "OrgWave: open orgwave-playbooks as workspace. "
     "Run orchestrator rule and playbook {playbook_id}. "
     "Read orgwave/catalog.yaml and playbooks/{playbook_id}/SKILL.md. "
-    "If gh is missing install it (e.g. brew install gh on macOS) or call /opt/homebrew/bin/gh when PATH omits Homebrew. "
-    "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file, branch, and PR steps; "
-    "use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
-    "If GitHub MCP auth fails after Run in Cursor, use repo .env or ~/.cursor/github-mcp.env for the PAT (mcp-servers/README.md). "
+    "If gh is missing install it for example brew install gh on macOS or call /opt/homebrew/bin/gh when PATH omits Homebrew. "
+    "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file branch and PR steps. "
+    "Use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
+    "If GitHub MCP auth fails see mcp-servers README for PAT env file options. "
     "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
 )
 
@@ -58,8 +60,8 @@ def build_prompt(playbook_id: str) -> str:
 
 
 def _encode_prompt_query(playbook_id: str) -> str:
-    # Match Cursor docs (Python example): plain urlencode. Prompt is kept short ASCII so + for spaces is fine.
-    return urllib.parse.urlencode({"text": build_prompt(playbook_id)})
+    # Use percent-encoding for spaces (%20) not + — some Cursor builds mishandle + in prompt text query values.
+    return "text=" + urllib.parse.quote(build_prompt(playbook_id), safe="")
 
 
 def web_url(playbook_id: str) -> str:
