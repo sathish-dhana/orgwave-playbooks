@@ -1,0 +1,88 @@
+# Run a playbook against selected services from the GitHub UI.
+#
+# Requires secret ORGWAVE_PAT: fine-grained or classic PAT with contents + pull-requests
+# (and metadata read) on target repos. For org-wide use, prefer a dedicated machine user or GitHub App.
+#
+# Each playbook that supports Actions must ship playbooks/<id>/scripts/gha-apply.sh
+
+name: OrgWave — run playbook
+
+on:
+  workflow_dispatch:
+    inputs:
+      playbook_id:
+        description: Playbook id (folder name under playbooks/)
+        required: true
+        type: string
+      repositories:
+        description: Target repos — owner/repo, comma or newline separated
+        required: true
+        type: string
+      dry_run:
+        description: Clone + apply only; no push or PR
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: orgwave-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  run-playbook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout playbooks repo
+        uses: actions/checkout@v4
+
+      - name: Validate playbook and Actions entrypoint
+        run: |
+          set -euo pipefail
+          pid="${{ inputs.playbook_id }}"
+          test -d "playbooks/${pid}" || { echo "Unknown playbook: ${pid}"; exit 1; }
+          test -f "playbooks/${pid}/scripts/gha-apply.sh" || {
+            echo "This playbook has no scripts/gha-apply.sh — add one for GitHub Actions, or run from Cursor only."
+            exit 1
+          }
+
+      - name: Run against each repository
+        env:
+          PLAYBOOK_ID: ${{ inputs.playbook_id }}
+          REPOSITORIES: ${{ inputs.repositories }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ secrets.ORGWAVE_PAT }}
+          PLAYBOOK_ROOT: ${{ github.workspace }}
+          ORGWAVE_BRANCH: techtask/${{ inputs.playbook_id }}-${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ "${DRY_RUN}" != "true" ] && [ -z "${GH_TOKEN:-}" ]; then
+            echo "Secret ORGWAVE_PAT is required when dry_run is false (clone private repos, push, PR)."
+            exit 1
+          fi
+
+          tmp="${RUNNER_TEMP}/orgwave-targets"
+          rm -rf "${tmp}"
+          mkdir -p "${tmp}"
+
+          printf '%s\n' "${REPOSITORIES}" | tr ',' '\n' | sed '/^[[:space:]]*$/d' | while IFS= read -r line; do
+            repo=$(echo "${line}" | tr -d '[:space:]')
+            [ -z "${repo}" ] && continue
+            case "${repo}" in
+              *[!a-zA-Z0-9._/-]*) echo "Invalid repo slug: ${repo}"; exit 1 ;;
+            esac
+
+            echo "========== ${repo} =========="
+            safe=$(echo "${repo}" | tr '/' '_')
+            dest="${tmp}/${safe}"
+
+            if [ -n "${GH_TOKEN:-}" ]; then
+              clone_url="https://x-access-token:${GH_TOKEN}@github.com/${repo}.git"
+            else
+              clone_url="https://github.com/${repo}.git"
+            fi
+            git clone --depth 1 "${clone_url}" "${dest}"
+
+            export TARGET_REPO_DIR="${dest}"
+            export REPO_SLUG="${repo}"
+            bash "${PLAYBOOK_ROOT}/playbooks/${PLAYBOOK_ID}/scripts/gha-apply.sh"
+          done

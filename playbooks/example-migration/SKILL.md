@@ -40,3 +40,7 @@ description: Example OrgWave playbook — lists eligible repos via global GitHub
 - [ ] User explicitly selected these repos
 - [ ] One PR per service
 - [ ] No merge
+
+## 7. GitHub Actions
+
+Same outcome without Cursor: workflow **OrgWave — run playbook** + `repositories` input. Implementation: `scripts/gha-apply.sh` (uses secret `ORGWAVE_PAT` when not dry run). Branch name is set by the workflow (`ORGWAVE_BRANCH`) to stay unique per run.

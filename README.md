@@ -10,6 +10,8 @@ Git repo of **subagent playbooks**: each playbook lists valid services (via your
 | `playbooks/<id>/SKILL.md` | Full workflow for that subagent |
 | `playbooks/_template/SKILL.md` | Copy this to add a new playbook |
 | `.cursor/rules/orgwave-orchestrator.mdc` | Tells Cursor how to load catalog + playbook |
+| `.github/workflows/orgwave-run.yml` | **Actions:** manual run against chosen repos |
+| `playbooks/<id>/scripts/gha-apply.sh` | Optional; required for Actions (deterministic apply + PR) |
 
 ## Quick start
 
@@ -31,8 +33,21 @@ Git repo of **subagent playbooks**: each playbook lists valid services (via your
 3. Add an entry under `playbooks:` in `catalog.yaml` with a unique `id`.
 4. Commit and push; share the repo so others use the same playbooks.
 
+## GitHub Actions
+
+Hosted runners **cannot** run Cursor or read `SKILL.md` as an LLM playbook. Actions instead run a **shell entrypoint** per playbook.
+
+1. Add repository secret **`ORGWAVE_PAT`**: PAT (or fine-grained token) with **contents** and **pull-requests** on every target repo (and **metadata** read). Prefer a bot account or GitHub App installation token.
+2. Push this repo to GitHub.
+3. **Actions → OrgWave — run playbook → Run workflow**  
+   - **playbook_id:** e.g. `example-migration`  
+   - **repositories:** `my-org/service-a,my-org/service-b` (or one per line in the multiline field)  
+   - **dry_run:** clone + commit locally in the runner only (no push/PR); use `false` for real PRs.
+
+Each playbook that supports Actions must implement `playbooks/<id>/scripts/gha-apply.sh` (see `example-migration`). The workflow passes `ORGWAVE_BRANCH` (unique per run) so pushes do not collide.
+
 ## Notes
 
-- **Selection** happens in chat after discovery — there is no separate UI; the catalog is the menu.
+- **Selection** in Cursor happens in chat after discovery; **selection in Actions** is the `repositories` workflow input (you type/paste `owner/repo` list).
 - **Local clones:** Prefer services already in your workspace; the playbook should say when to clone.
 - **Merges:** Playbooks should say *do not merge*; owners approve in GitHub.

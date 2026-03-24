@@ -18,3 +18,4 @@ This workspace is the **OrgWave playbooks** git repo. Subagents live under `play
 ## Adding a new subagent
 
 - Copy `playbooks/_template/SKILL.md` to `playbooks/<new-id>/SKILL.md`, fill sections, add an entry to `catalog.yaml`.
+- Optional: add `playbooks/<new-id>/scripts/gha-apply.sh` so **GitHub Actions** (`workflow_dispatch` → `orgwave-run.yml`) can run the same playbook against a comma-separated list of `owner/repo` values.

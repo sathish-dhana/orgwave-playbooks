@@ -46,3 +46,7 @@ For each selected service:
 - [ ] Only this playbook’s changes
 - [ ] Build/tests executed
 - [ ] No secrets or unrelated files
+
+## 7. GitHub Actions (optional)
+
+To run the same playbook from the **Actions** tab, add `playbooks/<id>/scripts/gha-apply.sh`. The workflow `.github/workflows/orgwave-run.yml` calls it with `TARGET_REPO_DIR`, `REPO_SLUG`, `DRY_RUN`, `GH_TOKEN`, `ORGWAVE_BRANCH`. Keep edits **deterministic** (shell); hosted runners do not run Cursor/LLM.
