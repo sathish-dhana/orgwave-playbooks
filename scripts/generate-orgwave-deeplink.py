@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import re
 import urllib.parse
 from pathlib import Path
@@ -16,11 +17,22 @@ PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
 README_MARKER = "<!-- orgwave-generated -->"
 
 # Single place for “Run in Cursor” badge markup (used for every playbook row).
-# for-the-badge = larger; green background (hex without # per shields.io).
-RUN_BUTTON_ALT = "Run in Cursor"
-RUN_BUTTON_BADGE_IMAGE = (
-    "https://img.shields.io/badge/Run_in-Cursor-22c55e?style=for-the-badge&logo=cursor&logoColor=white"
-)
+# for-the-badge = larger; green background; white ▶ via embedded SVG (play-button look).
+RUN_BUTTON_ALT = "Play — Run in Cursor"
+
+
+def _shields_run_badge_url() -> str:
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+        '<path fill="#fff" d="M8 5v14l11-7z"/>'
+        "</svg>"
+    )
+    logo = "data:image/svg+xml;base64," + base64.standard_b64encode(svg.encode()).decode()
+    q = urllib.parse.urlencode({"style": "for-the-badge", "logo": logo})
+    return f"https://img.shields.io/badge/-Run_in_Cursor-22c55e?{q}"
+
+
+RUN_BUTTON_BADGE_IMAGE = _shields_run_badge_url()
 
 
 def run_in_cursor_badge(deeplink_url: str) -> str:
@@ -114,7 +126,7 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
             "",
             badge,
             "",
-            "Click **Run** to open Cursor with this playbook’s prompt prefilled — you still confirm before the agent runs.",
+            "Click the **play** button to open Cursor with this playbook’s prompt prefilled — you still confirm before the agent runs.",
             "",
             f"- Agent instructions: **[SKILL.md](SKILL.md)**",
             f"- All playbooks: **[docs/run-in-cursor.md](../../docs/run-in-cursor.md)**",
