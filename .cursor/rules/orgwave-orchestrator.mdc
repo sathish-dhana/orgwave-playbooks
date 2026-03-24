@@ -1,0 +1,20 @@
+---
+description: OrgWave — select a playbook from catalog, list services, run playbook after user selection, create PRs. Use when user runs OrgWave or wants playbook-driven PRs.
+alwaysApply: false
+---
+
+# OrgWave orchestrator
+
+This workspace is the **OrgWave playbooks** git repo. Subagents live under `playbooks/<id>/SKILL.md` and are registered in `catalog.yaml`.
+
+## When the user wants to run a workflow
+
+1. Read `catalog.yaml`. If the user did not name a playbook `id`, show the list: `id`, `name`, `description` and ask them to pick one `id`.
+2. Load `playbooks/<id>/SKILL.md` and follow it exactly. That file is the subagent: eligibility, discovery, execution, PR rules.
+3. **GitHub MCP** is global — never add MCP config inside a playbook; use the enabled GitHub tools for discovery and any supported PR operations.
+4. **Mandatory gate:** complete **Discovery** and obtain **explicit user selection** of services before any clone/checkout edits.
+5. **One PR per selected service** unless the user agrees otherwise in chat.
+
+## Adding a new subagent
+
+- Copy `playbooks/_template/SKILL.md` to `playbooks/<new-id>/SKILL.md`, fill sections, add an entry to `catalog.yaml`.

@@ -1,0 +1,10 @@
+# OrgWave playbook index — add a row per subagent, then add matching folder under playbooks/<id>/
+#
+# id: stable slug used in chat, e.g. "Run playbook jdk21-migration"
+# name: human title
+# description: one line for the selection menu
+
+playbooks:
+  - id: example-migration
+    name: Example migration (template)
+    description: Placeholder playbook; copy to add a real migration.
