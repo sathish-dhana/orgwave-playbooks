@@ -5,7 +5,7 @@ set -euo pipefail
 
 ORG="${ORG:?set ORG to GitHub org or user login}"
 PLAYBOOK_ID="${PLAYBOOK_ID:?set PLAYBOOK_ID}"
-ROOT="${GITHUB_WORKSPACE:-$(cd "$(dirname "$0")/.." && pwd)}"
+ROOT="${GITHUB_WORKSPACE:-$(cd "$(dirname "$0")/../.." && pwd)}"
 OUT_JSON="${OUT_JSON:-discovery-output.json}"
 FILTER_FILE="${ROOT}/playbooks/${PLAYBOOK_ID}/discovery.json"
 

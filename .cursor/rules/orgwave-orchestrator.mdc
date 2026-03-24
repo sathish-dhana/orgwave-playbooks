@@ -5,20 +5,20 @@ alwaysApply: false
 
 # OrgWave orchestrator
 
-Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `catalog.yaml`.
+Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.yaml`.
 
 ## Flow
 
-1. Read `catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
+1. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
 2. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
 3. Use **global GitHub MCP** only — no MCP config inside playbooks.
 4. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
 5. **One PR per selected service** unless the user agrees otherwise.
 
-## After Actions “discover”
+## After discovery JSON
 
-If the user ran **OrgWave — discover repos** or attached **`discovery-output.json`**: treat that as the candidate list (no full re-list unless they ask). Still require explicit selection (names, numbers, or “all in this file”).
+If the user attached **`discovery-output.json`** (e.g. from local `orgwave/scripts/discover-repos.sh`): treat that as the candidate list (no full re-list unless they ask). Still require explicit selection (names, numbers, or “all in this file”).
 
 ## New playbooks
 
-Copy `playbooks/_template/`, register in `catalog.yaml`. **Run in Cursor** UI is generated from the catalog (`docs/run-in-cursor.md` and `playbooks/<id>/README.md` on GitHub); do not hand-edit those. Optional: `discovery.json`, `scripts/gha-apply.sh` — see `docs/reference.md`.
+Copy `playbooks/_template/`, register in `orgwave/catalog.yaml`. **Run in Cursor** UI is generated from the catalog (`orgwave/docs/run-in-cursor.md` and `playbooks/<id>/README.md` on GitHub); do not hand-edit those — run `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`. Optional: `discovery.json` — see `orgwave/docs/reference.md`.

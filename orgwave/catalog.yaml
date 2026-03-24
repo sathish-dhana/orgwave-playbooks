@@ -1,4 +1,4 @@
-# id = folder under playbooks/ — add a row and matching playbooks/<id>/SKILL.md
+# id = folder under playbooks/ — add a row and matching playbooks/<id>/SKILL.md (this file lives in orgwave/)
 
 playbooks:
   - id: example-migration
