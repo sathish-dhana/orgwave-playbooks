@@ -1,0 +1,69 @@
+# Lists org repositories using the GitHub API (same source as GitHub MCP in Cursor).
+# Does NOT run Cursor or MCP — runners cannot attach to your IDE. Use the artifact + Cursor Agent next.
+#
+# Token: ORGWAVE_PAT if set (broader org access); otherwise GITHUB_TOKEN (works for many org repos).
+
+name: OrgWave — discover repos
+
+on:
+  workflow_dispatch:
+    inputs:
+      organization:
+        description: GitHub org or user login (e.g. acme-corp)
+        required: true
+        type: string
+      playbook_id:
+        description: Playbook folder name under playbooks/ (uses playbooks/<id>/discovery.json if present)
+        required: true
+        type: string
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout playbooks repo
+        uses: actions/checkout@v4
+
+      - name: Validate playbook
+        run: |
+          test -d "playbooks/${{ inputs.playbook_id }}" || { echo "Unknown playbook"; exit 1; }
+
+      - name: List repos (GitHub API via gh)
+        env:
+          ORG: ${{ inputs.organization }}
+          PLAYBOOK_ID: ${{ inputs.playbook_id }}
+          GH_TOKEN: ${{ secrets.ORGWAVE_PAT }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x scripts/discover-repos.sh
+          scripts/discover-repos.sh
+
+      - name: Job summary (copy into Cursor or pick repos)
+        run: |
+          {
+            echo "## OrgWave discovery"
+            echo ""
+            echo "- **Org:** \`${{ inputs.organization }}\`"
+            echo "- **Playbook:** \`${{ inputs.playbook_id }}\`"
+            echo "- **Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo ""
+            echo "### Repos (markdown)"
+            echo ""
+            echo "| # | Repository | Default branch |"
+            echo "|---|------------|----------------|"
+            jq -r 'to_entries[] | "| \(.key + 1) | `\(.value.full_name)` | `\(.value.default_branch)` |"' discovery-output.json
+            echo ""
+            echo "### Next step (Cursor)"
+            echo ""
+            echo "Download artifact **discovery-output** (JSON) or use the table above. In Cursor with **Agent + GitHub MCP**, run the playbook on the repos you choose — Actions cannot run Cursor or MCP."
+            echo ""
+            echo "Example: *OrgWave: playbook \`${{ inputs.playbook_id }}\` — apply to repos 1,3,5 from the discovery run I just did* (or paste \`owner/repo\` list)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload discovery JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: discovery-output
+          path: discovery-output.json

@@ -10,8 +10,11 @@ Git repo of **subagent playbooks**: each playbook lists valid services (via your
 | `playbooks/<id>/SKILL.md` | Full workflow for that subagent |
 | `playbooks/_template/SKILL.md` | Copy this to add a new playbook |
 | `.cursor/rules/orgwave-orchestrator.mdc` | Tells Cursor how to load catalog + playbook |
-| `.github/workflows/orgwave-run.yml` | **Actions:** manual run against chosen repos |
-| `playbooks/<id>/scripts/gha-apply.sh` | Optional; required for Actions (deterministic apply + PR) |
+| `.github/workflows/orgwave-run.yml` | **Actions:** scripted apply + PR (no Cursor) |
+| `.github/workflows/orgwave-discover.yml` | **Actions:** list repos via GitHub API → artifact for Cursor |
+| `playbooks/<id>/discovery.json` | Optional filters for Discover (regex, topics) |
+| `scripts/discover-repos.sh` | Same discovery locally: `ORG=… PLAYBOOK_ID=… ./scripts/discover-repos.sh` |
+| `playbooks/<id>/scripts/gha-apply.sh` | Optional; required for scripted Actions apply |
 
 ## Quick start
 
@@ -33,9 +36,16 @@ Git repo of **subagent playbooks**: each playbook lists valid services (via your
 3. Add an entry under `playbooks:` in `catalog.yaml` with a unique `id`.
 4. Commit and push; share the repo so others use the same playbooks.
 
-## GitHub Actions
+## Recommended: Discover in Actions, apply in Cursor
 
-Hosted runners **cannot** run Cursor or read `SKILL.md` as an LLM playbook. Actions instead run a **shell entrypoint** per playbook.
+You cannot attach **Cursor MCP** to a GitHub-hosted runner. The practical split:
+
+1. **Actions → OrgWave — discover repos** — Uses `gh` + the same **GitHub API** your MCP would use. Produces a **job summary table** + artifact `discovery-output.json` (filtered by `playbooks/<id>/discovery.json` if present).
+2. **Cursor → Agent + GitHub MCP** — You pick repos from that list (or paste JSON). The agent follows `SKILL.md`, edits locally, opens PRs with judgment for fuzzy migrations.
+
+## GitHub Actions (scripted apply, optional)
+
+Hosted runners **cannot** run Cursor or read `SKILL.md` as an LLM playbook. **OrgWave — run playbook** runs **bash** only.
 
 1. Add repository secret **`ORGWAVE_PAT`**: PAT (or fine-grained token) with **contents** and **pull-requests** on every target repo (and **metadata** read). Prefer a bot account or GitHub App installation token.
 2. Push this repo to GitHub.

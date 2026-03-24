@@ -15,6 +15,16 @@ This workspace is the **OrgWave playbooks** git repo. Subagents live under `play
 4. **Mandatory gate:** complete **Discovery** and obtain **explicit user selection** of services before any clone/checkout edits.
 5. **One PR per selected service** unless the user agrees otherwise in chat.
 
+## Discover (GitHub Actions) → Apply (Cursor)
+
+**GitHub Actions cannot use Cursor MCP or the Cursor agent** — MCP runs inside the IDE. The workflow **OrgWave — discover repos** only calls the **GitHub API** (via `gh`), same data MCP would read.
+
+When the user says they ran Discover (or attaches `discovery-output.json` from the workflow artifact):
+
+1. Treat the JSON (or pasted table) as the **candidate list**; do not re-list the whole org unless they ask to refresh.
+2. Require **explicit selection** (repo names, numbers from the table, or “all in this JSON”).
+3. Then follow `playbooks/<id>/SKILL.md` for edits and PRs using **Agent + global GitHub MCP** (clone paths, file reads, `gh pr create`, etc.).
+
 ## Adding a new subagent
 
 - Copy `playbooks/_template/SKILL.md` to `playbooks/<new-id>/SKILL.md`, fill sections, add an entry to `catalog.yaml`.

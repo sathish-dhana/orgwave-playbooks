@@ -47,6 +47,12 @@ For each selected service:
 - [ ] Build/tests executed
 - [ ] No secrets or unrelated files
 
-## 7. GitHub Actions (optional)
+## 7. Discovery filters (optional)
+
+Add `playbooks/<id>/discovery.json` so **OrgWave — discover repos** (and `scripts/discover-repos.sh`) can filter the org list: `archived`, `include_name_regex`, `exclude_name_regex`, `require_topics_any`.
+
+## 8. GitHub Actions (optional)
 
 To run the same playbook from the **Actions** tab, add `playbooks/<id>/scripts/gha-apply.sh`. The workflow `.github/workflows/orgwave-run.yml` calls it with `TARGET_REPO_DIR`, `REPO_SLUG`, `DRY_RUN`, `GH_TOKEN`, `ORGWAVE_BRANCH`. Keep edits **deterministic** (shell); hosted runners do not run Cursor/LLM.
+
+**Listing repos in Actions** (no Cursor): use `.github/workflows/orgwave-discover.yml` + optional `discovery.json`; then apply from Cursor with Agent + MCP.

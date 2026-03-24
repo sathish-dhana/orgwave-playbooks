@@ -17,10 +17,11 @@ description: Example OrgWave playbook — lists eligible repos via global GitHub
 
 ## 3. Discovery (global GitHub MCP)
 
-1. List repositories for the org the user names (ask once if missing): e.g. `my-org`.
-2. Filter with **Eligibility**.
-3. Print numbered table: `#`, name, default branch, `html_url`.
-4. **Stop** for user selection (numbers or full names).
+1. If the user already ran **GitHub Actions → OrgWave — discover repos** (or attached `discovery-output.json`), treat that list as candidates matching **Eligibility**; only re-query GitHub if they ask to refresh.
+2. Otherwise: list repositories for the org the user names (ask once if missing): e.g. `my-org`, using GitHub MCP / `gh`.
+3. Filter with **Eligibility** (and align with `discovery.json` when Actions was used).
+4. Print numbered table: `#`, name, default branch, `html_url`.
+5. **Stop** for user selection (numbers or full names).
 
 ## 4. Execution (per selected repo)
 
@@ -43,4 +44,5 @@ description: Example OrgWave playbook — lists eligible repos via global GitHub
 
 ## 7. GitHub Actions
 
-Same outcome without Cursor: workflow **OrgWave — run playbook** + `repositories` input. Implementation: `scripts/gha-apply.sh` (uses secret `ORGWAVE_PAT` when not dry run). Branch name is set by the workflow (`ORGWAVE_BRANCH`) to stay unique per run.
+- **Discover:** workflow **OrgWave — discover repos** writes `discovery-output.json` + job summary (GitHub API only). Optional filters: `discovery.json`.
+- **Apply without Cursor:** workflow **OrgWave — run playbook** + `repositories` input and `scripts/gha-apply.sh` (secret `ORGWAVE_PAT`; branch from `ORGWAVE_BRANCH`).
