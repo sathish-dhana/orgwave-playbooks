@@ -1,6 +1,8 @@
-# OrgWave MCP server definitions
+# MCP server definitions (OrgWave)
 
-**Cursor only reads** [`.cursor/mcp.json`](../../.cursor/mcp.json) at the workspace root ([Cursor MCP docs](https://cursor.com/docs/context/mcp)). This folder is the **source of truth**: one JSON file per server; a script **merges** them into `.cursor/mcp.json`.
+**Cursor only reads** [`.cursor/mcp.json`](../.cursor/mcp.json) at the workspace root ([Cursor MCP docs](https://cursor.com/docs/context/mcp)). This top-level folder is the **source of truth** for MCP: one JSON file per server; a script **merges** them into `.cursor/mcp.json`.
+
+**Repo layout:** update **playbooks** under `playbooks/`; update **MCP servers** here — keep concerns separate.
 
 ## Add a server
 
@@ -13,7 +15,7 @@
 python3 orgwave/scripts/build-mcp-json.py
 ```
 
-Commit **both** `orgwave/mcp/servers/*.json` and the updated **`.cursor/mcp.json`**.
+Commit **both** `mcp-servers/servers/*.json` and the updated **`.cursor/mcp.json`**.
 
 ### Filename rules
 

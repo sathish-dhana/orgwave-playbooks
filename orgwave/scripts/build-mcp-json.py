@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge orgwave/mcp/servers/*.json into .cursor/mcp.json (Cursor project MCP config)."""
+"""Merge mcp-servers/servers/*.json into .cursor/mcp.json (Cursor project MCP config)."""
 from __future__ import annotations
 
 import argparse
@@ -10,7 +10,7 @@ from pathlib import Path
 
 _ORGWAVE_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = _ORGWAVE_DIR.parent
-SERVERS_DIR = _ORGWAVE_DIR / "mcp" / "servers"
+SERVERS_DIR = REPO_ROOT / "mcp-servers" / "servers"
 OUTPUT = REPO_ROOT / ".cursor" / "mcp.json"
 
 _ID_RE = re.compile(r"^[a-z0-9][a-z0-9-]*$")
@@ -43,7 +43,7 @@ def load_servers(servers_dir: Path) -> dict[str, dict]:
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(description="Build .cursor/mcp.json from orgwave/mcp/servers/*.json")
+    p = argparse.ArgumentParser(description="Build .cursor/mcp.json from mcp-servers/servers/*.json")
     p.add_argument(
         "--check",
         action="store_true",

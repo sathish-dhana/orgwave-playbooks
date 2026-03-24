@@ -17,7 +17,7 @@ That’s it. You do **not** add the green play button by hand.
 
 That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** (commit those updates with your PR).
 
-**MCP servers:** Definitions live in **`orgwave/mcp/servers/*.json`** — see **[orgwave/mcp/README.md](orgwave/mcp/README.md)**. After adding or editing a server file, run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
+**MCP servers:** Top-level **`mcp-servers/`** — see **[mcp-servers/README.md](mcp-servers/README.md)**. After adding or editing **`mcp-servers/servers/*.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
 
 ---
 
@@ -25,10 +25,11 @@ That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.
 
 | Path | Purpose |
 |------|---------|
-| **`orgwave/`** | Catalog, scripts, **[mcp/](orgwave/mcp/README.md)** (per-server JSON → merged MCP config), **[required-mcp.md](orgwave/required-mcp.md)** (MCP policy) |
 | **`playbooks/`** | Playbook folders (`<id>/SKILL.md`, optional `discovery.json`) |
+| **`mcp-servers/`** | MCP definitions (`servers/<id>.json`) → merged into `.cursor/mcp.json` — **[README](mcp-servers/README.md)** |
+| **`orgwave/`** | Catalog, scripts, **[required-mcp.md](orgwave/required-mcp.md)** (MCP policy), generated docs |
 | **`.cursor/rules/`** | Orchestrator rule |
-| **`.cursor/mcp.json`** | **Generated** from `orgwave/mcp/servers/*.json` — run `orgwave/scripts/build-mcp-json.py` |
+| **`.cursor/mcp.json`** | **Generated** from `mcp-servers/servers/*.json` — run `orgwave/scripts/build-mcp-json.py` |
 
 Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 
@@ -39,7 +40,7 @@ Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 | **Cursor Agent** | Real migrations: multi-file edits, judgment, tests. Open this repo, use the orchestrator rule, name a playbook from `orgwave/catalog.yaml`. |
 | **Run in Cursor** (deeplink) | Same with a [prefilled prompt](https://cursor.com/docs/reference/deeplinks). **[All playbooks → orgwave/docs/run-in-cursor.md](orgwave/docs/run-in-cursor.md)** |
 
-**Prerequisites:** Set env vars for each server (see **`_orgwave.env`** in `orgwave/mcp/servers/*.json`). **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional).
+**Prerequisites:** Set env vars for each server (see **`_orgwave.env`** in `mcp-servers/servers/*.json`). **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional).
 
 ```bash
 python3 orgwave/scripts/build-mcp-json.py
