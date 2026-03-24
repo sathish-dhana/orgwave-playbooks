@@ -43,6 +43,7 @@ DEEPLINK_PROMPT_TEMPLATE = (
     "If gh is missing install it (e.g. brew install gh on macOS) or call /opt/homebrew/bin/gh when PATH omits Homebrew. "
     "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file, branch, and PR steps; "
     "use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
+    "If GitHub MCP auth fails after Run in Cursor, use repo .env or ~/.cursor/github-mcp.env for the PAT (mcp-servers/README.md). "
     "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
 )
 

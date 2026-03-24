@@ -9,11 +9,12 @@
 The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`node`** in **`.cursor/mcp.json`**), which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github` in this order:
 
 1. Already set (e.g. repo-root **`.env`** via **`envFile`** — copy **`.env.example`**).
-2. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
-3. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
-4. **`gh auth token`** if `gh` is installed and logged in (Homebrew paths are tried first).
+2. **User env file** (only if no token yet): **`~/.cursor/github-mcp.env`** or **`~/.config/orgwave/github-mcp.env`** — one line per variable, e.g. `GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...` or `GITHUB_TOKEN=...`. Use this when you open Cursor from the **Dock** or the GitHub **Run in Cursor** link (those paths do not load **`~/.zshrc`** into Cursor’s process).
+3. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
+4. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
+5. **`gh auth token`** if `gh` is installed and logged in. The launcher **prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so `gh` is found even when the MCP child’s **`PATH`** is minimal.
 
-So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, export **`GITHUB_TOKEN`** or **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, **`~/.cursor/github-mcp.env`**, export **`GITHUB_TOKEN`** / **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
 
 ### Pinned install (recommended — faster connect)
 
