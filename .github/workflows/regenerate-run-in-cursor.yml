@@ -1,0 +1,42 @@
+# Regenerates docs/run-in-cursor.md from catalog.yaml — contributors only edit the catalog, not button HTML.
+
+name: Regenerate Run in Cursor
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "catalog.yaml"
+      - "scripts/generate-orgwave-deeplink.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: regenerate-run-in-cursor
+  cancel-in-progress: true
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate docs/run-in-cursor.md
+        run: python3 scripts/generate-orgwave-deeplink.py --write-docs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/run-in-cursor.md
+          if git diff --staged --quiet; then
+            echo "docs/run-in-cursor.md already matches catalog."
+            exit 0
+          fi
+          git commit -m "chore: regenerate docs/run-in-cursor.md"
+          git push

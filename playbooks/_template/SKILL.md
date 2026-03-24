@@ -44,3 +44,4 @@ Use **global GitHub MCP** (or `discovery-output.json` from Actions if the user p
 
 - **`playbooks/<id>/discovery.json`** — filters for Discover workflow / `scripts/discover-repos.sh` ([docs/reference.md](../../docs/reference.md)).
 - **`playbooks/<id>/scripts/gha-apply.sh`** — deterministic apply for **Actions → Run playbook** (no Cursor).
+- **Run in Cursor** buttons are **not** defined here — register the playbook in **`catalog.yaml`**; CI regenerates [docs/run-in-cursor.md](../../docs/run-in-cursor.md).

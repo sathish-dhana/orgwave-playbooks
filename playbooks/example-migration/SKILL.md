@@ -44,3 +44,4 @@ Per selected repo: prefer a local clone in the workspace; else clone with user a
 
 - **Discover:** `orgwave-discover.yml` + optional `discovery.json`
 - **Scripted apply:** `orgwave-run.yml` + `scripts/gha-apply.sh` + `ORGWAVE_PAT`
+- **Run in Cursor:** listed in `catalog.yaml` only; see [docs/run-in-cursor.md](../../docs/run-in-cursor.md) (auto-regenerated on `main`).

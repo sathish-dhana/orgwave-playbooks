@@ -19,9 +19,9 @@ Central **playbook** definitions for org-wide tech changes: discover candidate G
 | **Actions → Run playbook** | Deterministic shell only: `playbooks/<id>/scripts/gha-apply.sh`. No Cursor / no LLM. |
 
 ```bash
-python3 scripts/generate-orgwave-deeplink.py --write-docs   # refresh docs/run-in-cursor.md from catalog.yaml
-python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID # one-off https://cursor.com/link/…
-python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop     # cursor://…
+python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID              # one-off https://cursor.com/link/…
+python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop   # cursor://…
+python3 scripts/generate-orgwave-deeplink.py --write-docs               # optional local preview of docs/run-in-cursor.md
 ```
 
 ## Repository layout
@@ -35,15 +35,16 @@ python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop     # curs
 | `.cursor/rules/orgwave-orchestrator.mdc` | Loads catalog + playbook; enforces discover → select → PR |
 | `.github/workflows/orgwave-discover.yml` | Manual discover run |
 | `.github/workflows/orgwave-run.yml` | Manual scripted apply per repo list |
+| `.github/workflows/regenerate-run-in-cursor.yml` | On `main`: rebuilds **docs/run-in-cursor.md** from `catalog.yaml` |
 | `scripts/discover-repos.sh` | Local discover: `ORG=my-org PLAYBOOK_ID=my-playbook ./scripts/discover-repos.sh` |
-| `scripts/generate-orgwave-deeplink.py` | Deeplinks; `--write-docs` → [docs/run-in-cursor.md](docs/run-in-cursor.md) |
-| `docs/run-in-cursor.md` | **Run** buttons for every playbook in `catalog.yaml` |
+| `scripts/generate-orgwave-deeplink.py` | Shared deeplink + badge logic; generates [docs/run-in-cursor.md](docs/run-in-cursor.md) |
+| `docs/run-in-cursor.md` | **Generated** — Run buttons for every `catalog.yaml` entry (do not edit by hand) |
 
 ## Add a playbook
 
-1. `cp -r playbooks/_template playbooks/<id>`
-2. Edit `playbooks/<id>/SKILL.md` and add a row to `catalog.yaml`.
-3. Run `python3 scripts/generate-orgwave-deeplink.py --write-docs` so **docs/run-in-cursor.md** includes the new playbook’s button.
+1. `cp -r playbooks/_template playbooks/<id>` and edit `playbooks/<id>/SKILL.md`.
+2. Add a row to **`catalog.yaml`** (`id` must match the folder name). **Do not** add Run-button markup inside the playbook — buttons are generated from the catalog only.
+3. After your PR merges to `main`, **Regenerate Run in Cursor** updates [docs/run-in-cursor.md](docs/run-in-cursor.md) automatically (or run `--write-docs` locally to preview).
 4. Optional: `discovery.json`, `scripts/gha-apply.sh`.
 
 Details: **[docs/reference.md](docs/reference.md)**.

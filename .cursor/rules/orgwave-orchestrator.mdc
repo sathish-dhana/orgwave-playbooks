@@ -21,4 +21,4 @@ If the user ran **OrgWave — discover repos** or attached **`discovery-output.j
 
 ## New playbooks
 
-Copy `playbooks/_template/`, register in `catalog.yaml`. Optional: `discovery.json`, `scripts/gha-apply.sh` — see `docs/reference.md`.
+Copy `playbooks/_template/`, register in `catalog.yaml`. **Run in Cursor** controls are generated from the catalog (`docs/run-in-cursor.md`); do not add button markup inside playbooks. Optional: `discovery.json`, `scripts/gha-apply.sh` — see `docs/reference.md`.

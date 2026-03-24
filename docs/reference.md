@@ -2,11 +2,12 @@
 
 ## Run in Cursor (all playbooks)
 
-Buttons for each entry in `catalog.yaml` live in **[run-in-cursor.md](run-in-cursor.md)**. After editing the catalog, run:
+- **Source of truth:** `catalog.yaml` only. Playbook folders do **not** contain button code.
+- **Generated file:** [run-in-cursor.md](run-in-cursor.md) — badge + deeplink markup is defined once in `scripts/generate-orgwave-deeplink.py` (`RUN_BUTTON_*`, `run_in_cursor_badge()`).
+- **After merge to `main`:** workflow **Regenerate Run in Cursor** (`.github/workflows/regenerate-run-in-cursor.yml`) commits an updated `docs/run-in-cursor.md` when `catalog.yaml` or the generator script changes.
+- **Local preview:** `python3 scripts/generate-orgwave-deeplink.py --write-docs`
 
-```bash
-python3 scripts/generate-orgwave-deeplink.py --write-docs
-```
+If `main` is **branch-protected** and the default `GITHUB_TOKEN` cannot push, allow GitHub Actions to bypass protection for this workflow or use a PAT with `contents: write`.
 
 ---
 
