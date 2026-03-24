@@ -11,6 +11,9 @@ MAX_LEN = 8000
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CATALOG = REPO_ROOT / "catalog.yaml"
 RUN_MD = REPO_ROOT / "docs" / "run-in-cursor.md"
+PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
+# First line marker so we only overwrite/delete our own READMEs under playbooks/<id>/
+README_MARKER = "<!-- orgwave-generated -->"
 
 # Single place for “Run in Cursor” badge markup (used for every playbook row).
 RUN_BUTTON_ALT = "Run"
@@ -99,6 +102,60 @@ def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def playbook_readme_body(playbook_id: str, title: str) -> str:
+    badge = run_in_cursor_badge(web_url(playbook_id))
+    return "\n".join(
+        [
+            README_MARKER,
+            f"# {title}",
+            "",
+            f"Playbook id: `{playbook_id}`",
+            "",
+            badge,
+            "",
+            "Click **Run** to open Cursor with this playbook’s prompt prefilled — you still confirm before the agent runs.",
+            "",
+            f"- Agent instructions: **[SKILL.md](SKILL.md)**",
+            f"- All playbooks: **[docs/run-in-cursor.md](../../docs/run-in-cursor.md)**",
+            "",
+            "---",
+            "",
+            "*Auto-generated from `catalog.yaml` — do not edit. Regenerate with* "
+            "`python3 scripts/generate-orgwave-deeplink.py --write-docs`*.*",
+            "",
+        ]
+    )
+
+
+def write_playbook_readmes(entries: list[tuple[str, str | None]]) -> list[Path]:
+    """Write playbooks/<id>/README.md for each catalog entry when that folder exists."""
+    catalog_ids = {pid for pid, _ in entries}
+    written: list[Path] = []
+
+    for pid, name in entries:
+        folder = PLAYBOOKS_DIR / pid
+        if not folder.is_dir():
+            continue
+        readme = folder / "README.md"
+        readme.write_text(playbook_readme_body(pid, name or pid), encoding="utf-8")
+        written.append(readme)
+
+    # Remove stale generated READMEs (playbook removed from catalog)
+    if PLAYBOOKS_DIR.is_dir():
+        for readme in PLAYBOOKS_DIR.glob("*/README.md"):
+            try:
+                first = readme.read_text(encoding="utf-8").splitlines()[:1]
+            except OSError:
+                continue
+            if first != [README_MARKER]:
+                continue
+            parent_id = readme.parent.name
+            if parent_id not in catalog_ids:
+                readme.unlink(missing_ok=True)
+
+    return written
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description="Generate Cursor deeplinks for OrgWave playbooks")
     p.add_argument("playbook_id", nargs="?", help="Single playbook id (folder under playbooks/)")
@@ -106,7 +163,7 @@ def main() -> None:
     p.add_argument(
         "--write-docs",
         action="store_true",
-        help=f"Write docs/run-in-cursor.md for every playbook in catalog.yaml",
+        help="Write docs/run-in-cursor.md and playbooks/<id>/README.md (folder landing + Run badge)",
     )
     p.add_argument(
         "--print-all",
@@ -124,6 +181,9 @@ def main() -> None:
             RUN_MD.parent.mkdir(parents=True, exist_ok=True)
             RUN_MD.write_text(body, encoding="utf-8")
             print(f"Wrote {RUN_MD}")
+            readmes = write_playbook_readmes(entries)
+            for r in readmes:
+                print(f"Wrote {r}")
         return
 
     if not args.playbook_id:

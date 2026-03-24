@@ -30,6 +30,7 @@ python3 scripts/generate-orgwave-deeplink.py --write-docs               # option
 |------|---------|
 | `catalog.yaml` | Playbook index (`id`, `name`, `description`) |
 | `playbooks/<id>/SKILL.md` | Instructions for Cursor Agent (intent, eligibility, discovery, execution, PR) |
+| `playbooks/<id>/README.md` | **Generated** — GitHub shows a **Run** badge when you open the playbook folder |
 | `playbooks/<id>/discovery.json` | Optional filters for Discover workflow / `discover-repos.sh` |
 | `playbooks/<id>/scripts/gha-apply.sh` | Optional; required for **Actions → Run playbook** |
 | `.cursor/rules/orgwave-orchestrator.mdc` | Loads catalog + playbook; enforces discover → select → PR |

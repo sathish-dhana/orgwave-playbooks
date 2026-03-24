@@ -3,7 +3,7 @@
 ## Run in Cursor (all playbooks)
 
 - **Source of truth:** `catalog.yaml` only. Playbook folders do **not** contain button code.
-- **Generated file:** [run-in-cursor.md](run-in-cursor.md) — badge + deeplink markup is defined once in `scripts/generate-orgwave-deeplink.py` (`RUN_BUTTON_*`, `run_in_cursor_badge()`).
+- **Generated files:** [run-in-cursor.md](run-in-cursor.md) (all playbooks) and **`playbooks/<id>/README.md`** (per playbook — GitHub renders this under the folder file list so the **Run** badge appears *in* `playbooks/my-playbook/`). Markup lives in `scripts/generate-orgwave-deeplink.py` (`RUN_BUTTON_*`, `run_in_cursor_badge()`).
 - **After merge to `main`:** workflow **Regenerate Run in Cursor** (`.github/workflows/regenerate-run-in-cursor.yml`) commits an updated `docs/run-in-cursor.md` when `catalog.yaml` or the generator script changes.
 - **Local preview:** `python3 scripts/generate-orgwave-deeplink.py --write-docs`
 
