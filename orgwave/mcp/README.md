@@ -1,0 +1,80 @@
+# OrgWave MCP server definitions
+
+**Cursor only reads** [`.cursor/mcp.json`](../../.cursor/mcp.json) at the workspace root ([Cursor MCP docs](https://cursor.com/docs/context/mcp)). This folder is the **source of truth**: one JSON file per server; a script **merges** them into `.cursor/mcp.json`.
+
+## Add a server
+
+1. Create **`servers/<id>.json`** where **`<id>`** is the MCP server key Cursor uses (must match `server` in `~/.cursor/permissions.json` patterns like `<id>:*`).
+2. File content = **one** server object in Cursor’s format (same fields as inside `mcpServers.<id>`).
+3. Optional top-level **`_orgwave`**: metadata for humans and the agent (not written to `mcp.json`).
+
+```bash
+# From repository root — regenerates .cursor/mcp.json
+python3 orgwave/scripts/build-mcp-json.py
+```
+
+Commit **both** `orgwave/mcp/servers/*.json` and the updated **`.cursor/mcp.json`**.
+
+### Filename rules
+
+| Rule | |
+|------|--|
+| **Name** | `servers/<id>.json` — use only `[a-z0-9-]+` for `<id>` (e.g. `github`, `linear`). |
+| **Skip** | Files whose name starts with **`_`** are ignored (templates / notes only). |
+| **Secrets** | Never commit tokens. Use **`${env:VAR_NAME}`** in `env` / `headers` per [config interpolation](https://cursor.com/docs/context/mcp). |
+
+### Standard shape (stdio — most common)
+
+```json
+{
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "some-mcp-package"],
+  "env": {
+    "API_TOKEN": "${env:MY_ORG_API_TOKEN}"
+  },
+  "_orgwave": {
+    "title": "Human name",
+    "purpose": "What OrgWave uses it for (discovery, PRs, …).",
+    "env": ["MY_ORG_API_TOKEN"],
+    "permissionsAllowlistHint": "myserver:*"
+  }
+}
+```
+
+### Remote server (HTTP / SSE)
+
+```json
+{
+  "url": "https://api.example.com/mcp",
+  "headers": {
+    "Authorization": "Bearer ${env:EXAMPLE_TOKEN}"
+  },
+  "_orgwave": {
+    "title": "Example remote",
+    "purpose": "…",
+    "env": ["EXAMPLE_TOKEN"]
+  }
+}
+```
+
+Follow [Cursor MCP — Remote Server](https://cursor.com/docs/context/mcp) for OAuth and other fields.
+
+### `_orgwave` fields (optional, all optional)
+
+| Field | Meaning |
+|-------|---------|
+| `title` | Display name in docs. |
+| `purpose` | When the agent should prefer this server. |
+| `env` | List of env var names users must set for the token/secret. |
+| `permissionsAllowlistHint` | Suggested `mcpAllowlist` entry for `~/.cursor/permissions.json`. |
+
+## Behaviour with prompts
+
+- If **`_orgwave.env`** vars are available to Cursor’s MCP process, that server **can** auto-start and tools appear to the agent.
+- If not, OrgWave **does not block** — fall back to `gh`, other MCP servers, or `discovery-output.json` per **`orgwave/required-mcp.md`** and the playbook **`SKILL.md`**.
+
+## See also
+
+- **`orgwave/required-mcp.md`** — policy (non-blocking, fallbacks).
+- **`orgwave/scripts/build-mcp-json.py`** — merge implementation.

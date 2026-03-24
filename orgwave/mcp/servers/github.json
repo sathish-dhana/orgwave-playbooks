@@ -1,0 +1,14 @@
+{
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "@modelcontextprotocol/server-github"],
+  "env": {
+    "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+  },
+  "_orgwave": {
+    "title": "GitHub",
+    "purpose": "List/filter org repos and GitHub metadata during OrgWave discovery.",
+    "env": ["GITHUB_TOKEN"],
+    "permissionsAllowlistHint": "github:*"
+  }
+}

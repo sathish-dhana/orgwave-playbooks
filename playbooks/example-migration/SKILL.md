@@ -18,7 +18,7 @@ description: Sample OrgWave playbook — discover via GitHub MCP, select repos, 
 ## 3. Discovery
 
 1. If the user attached **`discovery-output.json`** (e.g. from local `orgwave/scripts/discover-repos.sh`), use it as candidates (respect **Eligibility**); re-query only if asked.
-2. Else list repos (GitHub MCP / `gh`) for the org.
+2. Else list repos (MCP per `orgwave/mcp/servers/` + `orgwave/required-mcp.md`, or `gh`) for the org.
 3. Numbered table: `#`, name, default branch, `html_url`. **Stop** for selection.
 
 ## 4. Execution
@@ -43,4 +43,5 @@ Per selected repo: prefer a local clone in the workspace; else clone with user a
 ## Automation notes
 
 - **Run in Cursor:** listed in `orgwave/catalog.yaml` only; see [orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md). Regenerate badges with `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`.
+- **MCP:** shared servers in [orgwave/mcp/servers/](../../orgwave/mcp/servers/) — [orgwave/mcp/README.md](../../orgwave/mcp/README.md); merge with `python3 orgwave/scripts/build-mcp-json.py`.
 - **Optional local discover:** `discovery.json` + [orgwave/scripts/discover-repos.sh](../../orgwave/scripts/discover-repos.sh) — see [orgwave/docs/reference.md](../../orgwave/docs/reference.md).

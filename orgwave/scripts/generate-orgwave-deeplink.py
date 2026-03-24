@@ -42,10 +42,14 @@ def run_in_cursor_badge(deeplink_url: str) -> str:
 
 
 def build_prompt(playbook_id: str) -> str:
-    return f"""You are running OrgWave. Open this orgwave-playbooks repository as the Cursor workspace (clone it first if needed).
+    return f"""You are running OrgWave. Use the **orgwave-playbooks** repository as the Cursor workspace.
 
-1. Follow .cursor/rules/orgwave-orchestrator.mdc and load playbook id `{playbook_id}` from orgwave/catalog.yaml and playbooks/{playbook_id}/SKILL.md.
-2. Ask me for the GitHub org if unknown. Use global GitHub MCP to list/filter repos per the playbook (or use a discovery JSON file if I attach it).
+**Git workspace:** If this folder is not open yet, clone the repo (or ask me to open it). If it is already the workspace, ensure it is up to date: `git fetch` and fast-forward or `git pull` on the current branch (prefer latest default branch) unless I say otherwise.
+
+**MCP (non-blocking):** Read `orgwave/required-mcp.md` and **`orgwave/mcp/README.md`**. Server wiring lives in **`orgwave/mcp/servers/<id>.json`** (one file per server; optional **`_orgwave`** block lists env vars like `GITHUB_TOKEN`). Those files are merged into **`.cursor/mcp.json`** — use whichever MCP servers Cursor exposes and respond when their env tokens are available. **Prefer** them for discovery when tools work; if any server is down, errors, or needs approval, **do not stop the playbook** — fall back to **`gh`** and/or **`discovery-output.json`** per the playbook. Never require me to fix MCP before continuing.
+
+1. Follow `.cursor/rules/orgwave-orchestrator.mdc` and load playbook id `{playbook_id}` from `orgwave/catalog.yaml` and `playbooks/{playbook_id}/SKILL.md`.
+2. Ask me for the GitHub org if unknown. List/filter repos using MCP when it works; otherwise use `gh` or discovery JSON without delay.
 3. Show a numbered table of candidate services and STOP until I select which repos to run.
 4. For each selected service: apply the playbook, run tests if applicable, push branches, open one PR per service. Do not merge."""
 

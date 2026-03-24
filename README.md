@@ -17,15 +17,18 @@ That’s it. You do **not** add the green play button by hand.
 
 That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** (commit those updates with your PR).
 
+**MCP servers:** Definitions live in **`orgwave/mcp/servers/*.json`** — see **[orgwave/mcp/README.md](orgwave/mcp/README.md)**. After adding or editing a server file, run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
+
 ---
 
 ## Maintainer / automation layout
 
 | Path | Purpose |
 |------|---------|
-| **`orgwave/`** | Catalog, scripts, and generated docs (`catalog.yaml`, `scripts/`, `docs/`) |
+| **`orgwave/`** | Catalog, scripts, **[mcp/](orgwave/mcp/README.md)** (per-server JSON → merged MCP config), **[required-mcp.md](orgwave/required-mcp.md)** (MCP policy) |
 | **`playbooks/`** | Playbook folders (`<id>/SKILL.md`, optional `discovery.json`) |
-| **`.cursor/rules/`** | Cursor orchestrator rule (workspace root) |
+| **`.cursor/rules/`** | Orchestrator rule |
+| **`.cursor/mcp.json`** | **Generated** from `orgwave/mcp/servers/*.json` — run `orgwave/scripts/build-mcp-json.py` |
 
 Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 
@@ -36,9 +39,10 @@ Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 | **Cursor Agent** | Real migrations: multi-file edits, judgment, tests. Open this repo, use the orchestrator rule, name a playbook from `orgwave/catalog.yaml`. |
 | **Run in Cursor** (deeplink) | Same with a [prefilled prompt](https://cursor.com/docs/reference/deeplinks). **[All playbooks → orgwave/docs/run-in-cursor.md](orgwave/docs/run-in-cursor.md)** |
 
-**Prerequisites:** Cursor with [GitHub MCP](https://cursor.com/docs) if you use the agent; **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional).
+**Prerequisites:** Set env vars for each server (see **`_orgwave.env`** in `orgwave/mcp/servers/*.json`). **`gh`** and **`jq`** if you use [local discovery](orgwave/docs/reference.md#local-discovery-optional).
 
 ```bash
+python3 orgwave/scripts/build-mcp-json.py
 python3 orgwave/scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID
 python3 orgwave/scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop
 python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs

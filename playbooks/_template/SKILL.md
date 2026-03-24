@@ -18,7 +18,7 @@ description: Template — copy folder to playbooks/<new-id>/ and register in org
 
 ## 3. Discovery
 
-Use **global GitHub MCP** (or `discovery-output.json` if the user provides it — e.g. from `orgwave/scripts/discover-repos.sh`). Apply **Eligibility**. Print a **numbered** table: `#`, repo, default branch, URL. **Stop** until the user picks repos.
+Use **MCP** when available (see `orgwave/mcp/servers/` + `orgwave/required-mcp.md`), or `discovery-output.json` if the user provides it (e.g. from `orgwave/scripts/discover-repos.sh`). Apply **Eligibility**. Print a **numbered** table: `#`, repo, default branch, URL. **Stop** until the user picks repos.
 
 **Org / scope:** …
 
@@ -43,4 +43,5 @@ Use **global GitHub MCP** (or `discovery-output.json` if the user provides it �
 ## Optional tooling
 
 - **`playbooks/<id>/discovery.json`** — filters for **`orgwave/scripts/discover-repos.sh`** ([orgwave/docs/reference.md](../../orgwave/docs/reference.md)).
+- **MCP** — add shared servers under **`orgwave/mcp/servers/`** ([orgwave/mcp/README.md](../../orgwave/mcp/README.md)), then **`python3 orgwave/scripts/build-mcp-json.py`**; do not paste server config into this playbook.
 - **Run in Cursor** is **not** defined in `SKILL.md` — add the playbook to **`orgwave/catalog.yaml`**, then run `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs` to refresh [orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md) and **`README.md` in this folder** (GitHub shows the play badge on the playbook directory).

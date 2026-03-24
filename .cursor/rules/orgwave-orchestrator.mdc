@@ -9,11 +9,12 @@ Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.y
 
 ## Flow
 
-1. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
-2. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
-3. Use **global GitHub MCP** only — no MCP config inside playbooks.
-4. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
-5. **One PR per selected service** unless the user agrees otherwise.
+1. Read `orgwave/required-mcp.md`, **`orgwave/mcp/README.md`**, and scan **`orgwave/mcp/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config from those files. **Prefer** any MCP server whose tools work (env/token available to Cursor). **Never block OrgWave on MCP:** if MCP is missing, errors, or pending approval, **immediately** fall back to **`gh`** and/or **`discovery-output.json`** — do not stop the run to demand MCP setup.
+2. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
+3. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
+4. Discovery: MCP first when usable; else `gh` / JSON — no extra MCP config inside playbooks.
+5. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
+6. **One PR per selected service** unless the user agrees otherwise.
 
 ## After discovery JSON
 
@@ -21,4 +22,4 @@ If the user attached **`discovery-output.json`** (e.g. from local `orgwave/scrip
 
 ## New playbooks
 
-Copy `playbooks/_template/`, register in `orgwave/catalog.yaml`. **Run in Cursor** UI is generated from the catalog (`orgwave/docs/run-in-cursor.md` and `playbooks/<id>/README.md` on GitHub); do not hand-edit those — run `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`. Optional: `discovery.json` — see `orgwave/docs/reference.md`.
+Copy `playbooks/_template/`, register in `orgwave/catalog.yaml`. **Run in Cursor** UI is generated from the catalog (`orgwave/docs/run-in-cursor.md` and `playbooks/<id>/README.md` on GitHub); do not hand-edit those — run `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`. **MCP:** add servers under `orgwave/mcp/servers/` per `orgwave/mcp/README.md`, then `python3 orgwave/scripts/build-mcp-json.py`. Optional: `discovery.json` — see `orgwave/docs/reference.md`.

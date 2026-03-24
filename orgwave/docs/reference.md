@@ -8,6 +8,15 @@
 
 ---
 
+## MCP servers
+
+- **Policy:** [`../required-mcp.md`](../required-mcp.md).
+- **How to add servers:** [`../mcp/README.md`](../mcp/README.md) — one JSON file per server under [`../mcp/servers/`](../mcp/servers/).
+- **Merge script:** `python3 orgwave/scripts/build-mcp-json.py` → writes [`.cursor/mcp.json`](../../.cursor/mcp.json) ([Cursor project MCP](https://cursor.com/docs/context/mcp)). Tokens only via `${env:…}` / `_orgwave.env`, never committed.
+- **Agent behavior:** Prefer MCP when tools work; **never block** — fall back to `gh` / `discovery-output.json` per `required-mcp.md`.
+
+---
+
 ## `discovery.json` (optional)
 
 Place at `playbooks/<id>/discovery.json`. Used by **`orgwave/scripts/discover-repos.sh`** when listing repos for that playbook.
