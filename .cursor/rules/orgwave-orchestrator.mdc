@@ -1,31 +1,24 @@
 ---
-description: OrgWave — select a playbook from catalog, list services, run playbook after user selection, create PRs. Use when user runs OrgWave or wants playbook-driven PRs.
+description: OrgWave — load playbook from catalog, discover repos, wait for user selection, then PRs. Use when user runs OrgWave or playbook-driven migrations.
 alwaysApply: false
 ---
 
 # OrgWave orchestrator
 
-This workspace is the **OrgWave playbooks** git repo. Subagents live under `playbooks/<id>/SKILL.md` and are registered in `catalog.yaml`.
+Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `catalog.yaml`.
 
-## When the user wants to run a workflow
+## Flow
 
-1. Read `catalog.yaml`. If the user did not name a playbook `id`, show the list: `id`, `name`, `description` and ask them to pick one `id`.
-2. Load `playbooks/<id>/SKILL.md` and follow it exactly. That file is the subagent: eligibility, discovery, execution, PR rules.
-3. **GitHub MCP** is global — never add MCP config inside a playbook; use the enabled GitHub tools for discovery and any supported PR operations.
-4. **Mandatory gate:** complete **Discovery** and obtain **explicit user selection** of services before any clone/checkout edits.
-5. **One PR per selected service** unless the user agrees otherwise in chat.
+1. Read `catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
+2. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
+3. Use **global GitHub MCP** only — no MCP config inside playbooks.
+4. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
+5. **One PR per selected service** unless the user agrees otherwise.
 
-## Discover (GitHub Actions) → Apply (Cursor)
+## After Actions “discover”
 
-**GitHub Actions cannot use Cursor MCP or the Cursor agent** — MCP runs inside the IDE. The workflow **OrgWave — discover repos** only calls the **GitHub API** (via `gh`), same data MCP would read.
+If the user ran **OrgWave — discover repos** or attached **`discovery-output.json`**: treat that as the candidate list (no full re-list unless they ask). Still require explicit selection (names, numbers, or “all in this file”).
 
-When the user says they ran Discover (or attaches `discovery-output.json` from the workflow artifact):
+## New playbooks
 
-1. Treat the JSON (or pasted table) as the **candidate list**; do not re-list the whole org unless they ask to refresh.
-2. Require **explicit selection** (repo names, numbers from the table, or “all in this JSON”).
-3. Then follow `playbooks/<id>/SKILL.md` for edits and PRs using **Agent + global GitHub MCP** (clone paths, file reads, `gh pr create`, etc.).
-
-## Adding a new subagent
-
-- Copy `playbooks/_template/SKILL.md` to `playbooks/<new-id>/SKILL.md`, fill sections, add an entry to `catalog.yaml`.
-- Optional: add `playbooks/<new-id>/scripts/gha-apply.sh` so **GitHub Actions** (`workflow_dispatch` → `orgwave-run.yml`) can run the same playbook against a comma-separated list of `owner/repo` values.
+Copy `playbooks/_template/`, register in `catalog.yaml`. Optional: `discovery.json`, `scripts/gha-apply.sh` — see `docs/reference.md`.

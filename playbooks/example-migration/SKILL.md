@@ -1,48 +1,46 @@
 ---
 name: orgwave-example-migration
-description: Example OrgWave playbook — lists eligible repos via global GitHub MCP, waits for selection, then opens PRs. Replace eligibility and execution for a real task.
+description: Sample OrgWave playbook — discover via GitHub MCP, select repos, add a POC marker file, open PRs.
 ---
 
-# Example migration
+# Example migration (POC)
 
 ## 1. Intent
 
-- **Change:** Demonstrate the OrgWave flow (no real production change unless you extend this file).
-- **Done when:** User-selected repos have a trivial doc-only or agreed change and an open PR.
+- **Change:** Add a small marker file to show the OrgWave flow.
+- **Done when:** Each chosen repo has an open PR with that change.
 
-## 2. Repo eligibility
+## 2. Eligibility
 
-- **Must:** Be under the GitHub org / scope defined in section 3; not archived.
-- **Must not:** Name contains `archived-` or `deprecated-` (adjust to taste).
+- Same GitHub org / scope the user names; not archived.
+- Exclude names containing `archived-` or `deprecated-` if you keep that policy.
 
-## 3. Discovery (global GitHub MCP)
+## 3. Discovery
 
-1. If the user already ran **GitHub Actions → OrgWave — discover repos** (or attached `discovery-output.json`), treat that list as candidates matching **Eligibility**; only re-query GitHub if they ask to refresh.
-2. Otherwise: list repositories for the org the user names (ask once if missing): e.g. `my-org`, using GitHub MCP / `gh`.
-3. Filter with **Eligibility** (and align with `discovery.json` when Actions was used).
-4. Print numbered table: `#`, name, default branch, `html_url`.
-5. **Stop** for user selection (numbers or full names).
+1. If the user attached **`discovery-output.json`** from **OrgWave — discover repos**, use it as candidates (respect **Eligibility**); re-query only if asked.
+2. Else list repos (GitHub MCP / `gh`) for the org.
+3. Numbered table: `#`, name, default branch, `html_url`. **Stop** for selection.
 
-## 4. Execution (per selected repo)
+## 4. Execution
 
-1. Use local checkout under the user workspace if present; otherwise clone to a path the user approves.
-2. Branch: `techtask/example-migration-poc`.
-3. **Minimal safe change for POC:** add or update `ORGWAVE_PLAYBOOK.md` at repo root with one line: `Playbook: example-migration (POC)`.
-4. Run `git status`; if the repo has a standard build, run its quick check only if appropriate (skip if unknown).
-5. Commit: `chore: add OrgWave playbook marker (POC)`, push, open PR.
+Per selected repo: prefer a local clone in the workspace; else clone with user approval.
+
+- Branch: `techtask/example-migration-poc`
+- Add or update **`ORGWAVE_PLAYBOOK.md`** at repo root: `Playbook: example-migration (POC)`
+- Commit: `chore: add OrgWave playbook marker (POC)`; push; open PR.
 
 ## 5. PR
 
 - **Title:** `example-migration: OrgWave POC marker`
-- **Body:** Link to `orgwave-playbooks` repo; note this is a POC; do not merge without review.
+- **Body:** Link this playbooks repo; POC only; **do not merge** without review.
 
 ## 6. Checklist
 
-- [ ] User explicitly selected these repos
+- [ ] User selected these repos explicitly
 - [ ] One PR per service
-- [ ] No merge
+- [ ] No merge by agent
 
-## 7. GitHub Actions
+## Actions (optional)
 
-- **Discover:** workflow **OrgWave — discover repos** writes `discovery-output.json` + job summary (GitHub API only). Optional filters: `discovery.json`.
-- **Apply without Cursor:** workflow **OrgWave — run playbook** + `repositories` input and `scripts/gha-apply.sh` (secret `ORGWAVE_PAT`; branch from `ORGWAVE_BRANCH`).
+- **Discover:** `orgwave-discover.yml` + optional `discovery.json`
+- **Scripted apply:** `orgwave-run.yml` + `scripts/gha-apply.sh` + `ORGWAVE_PAT`

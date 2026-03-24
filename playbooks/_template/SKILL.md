@@ -1,6 +1,6 @@
 ---
 name: orgwave-playbook-template
-description: Template only — copy folder to playbooks/<new-id>/ and register in catalog.yaml.
+description: Template — copy folder to playbooks/<new-id>/ and register in catalog.yaml.
 ---
 
 # YOUR_PLAYBOOK_TITLE
@@ -10,49 +10,37 @@ description: Template only — copy folder to playbooks/<new-id>/ and register i
 - **Change:** …
 - **Done when:** …
 
-## 2. Repo eligibility (valid services for this migration)
+## 2. Repo eligibility
 
 - Must have: …
 - Must not: …
-- Match (optional): name pattern, topic, language, archived=false …
+- Optional: name pattern, topics, language …
 
-## 3. Discovery (global GitHub MCP — do not configure MCP here)
+## 3. Discovery
 
-1. Use the **globally enabled GitHub MCP** to list/search repositories per org rules below.
-2. Apply **Eligibility**; drop repos that do not qualify.
-3. Output a **numbered table**: `#`, repo name, default branch, URL, short note (e.g. build type if inferable).
-4. **Stop** and ask: *Which numbers or repo names should I run?* Do not edit any repo until the user selects.
+Use **global GitHub MCP** (or `discovery-output.json` from Actions if the user provides it). Apply **Eligibility**. Print a **numbered** table: `#`, repo, default branch, URL. **Stop** until the user picks repos.
 
-**Org / scope:** … (e.g. org slug, team, topic filter — fill when copying)
+**Org / scope:** …
 
-## 4. Execution (per user-selected repo)
+## 4. Execution (per selected repo)
 
-For each selected service:
-
-1. Resolve a **local path** (workspace clone) or clone if missing; confirm `git` remote matches GitHub.
+1. Local workspace path or clone; verify `git` remote.
 2. Branch: `techtask/<playbook-id>-<short-slug>` from default branch.
-3. Apply changes: … (files, patterns)
-4. Run tests/build: …
-5. Commit (conventional), push `origin`, create **one PR** per service.
+3. Apply changes; run tests/build as appropriate.
+4. Conventional commit, push, **one PR** per repo.
 
 ## 5. PR
 
 - **Title:** `PLAYBOOK_ID: short title`
-- **Body:** summary, checklist, test commands, rollback note.
-- **Do not merge.**
+- **Body:** summary, checklist, tests, rollback; **do not merge** without owners.
 
-## 6. Checklist before push
+## 6. Checklist
 
-- [ ] Only this playbook’s changes
-- [ ] Build/tests executed
+- [ ] Scoped to this playbook only
+- [ ] Tests/build where applicable
 - [ ] No secrets or unrelated files
 
-## 7. Discovery filters (optional)
+## Optional automation
 
-Add `playbooks/<id>/discovery.json` so **OrgWave — discover repos** (and `scripts/discover-repos.sh`) can filter the org list: `archived`, `include_name_regex`, `exclude_name_regex`, `require_topics_any`.
-
-## 8. GitHub Actions (optional)
-
-To run the same playbook from the **Actions** tab, add `playbooks/<id>/scripts/gha-apply.sh`. The workflow `.github/workflows/orgwave-run.yml` calls it with `TARGET_REPO_DIR`, `REPO_SLUG`, `DRY_RUN`, `GH_TOKEN`, `ORGWAVE_BRANCH`. Keep edits **deterministic** (shell); hosted runners do not run Cursor/LLM.
-
-**Listing repos in Actions** (no Cursor): use `.github/workflows/orgwave-discover.yml` + optional `discovery.json`; then apply from Cursor with Agent + MCP.
+- **`playbooks/<id>/discovery.json`** — filters for Discover workflow / `scripts/discover-repos.sh` ([docs/reference.md](../../docs/reference.md)).
+- **`playbooks/<id>/scripts/gha-apply.sh`** — deterministic apply for **Actions → Run playbook** (no Cursor).

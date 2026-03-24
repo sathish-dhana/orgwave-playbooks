@@ -1,9 +1,4 @@
-# Run a playbook against selected services from the GitHub UI.
-#
-# Requires secret ORGWAVE_PAT: fine-grained or classic PAT with contents + pull-requests
-# (and metadata read) on target repos. For org-wide use, prefer a dedicated machine user or GitHub App.
-#
-# Each playbook that supports Actions must ship playbooks/<id>/scripts/gha-apply.sh
+# Scripted apply only — requires playbooks/<id>/scripts/gha-apply.sh (see docs/reference.md).
 
 name: OrgWave — run playbook
 
@@ -47,7 +42,6 @@ jobs:
 
       - name: Run against each repository
         env:
-          PLAYBOOK_ID: ${{ inputs.playbook_id }}
           REPOSITORIES: ${{ inputs.repositories }}
           DRY_RUN: ${{ inputs.dry_run }}
           GH_TOKEN: ${{ secrets.ORGWAVE_PAT }}

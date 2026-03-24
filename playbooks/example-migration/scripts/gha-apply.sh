@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Called from .github/workflows/orgwave-run.yml with:
-#   PLAYBOOK_ROOT, TARGET_REPO_DIR, REPO_SLUG, DRY_RUN, GH_TOKEN
+# Invoked by orgwave-run.yml — env: TARGET_REPO_DIR, REPO_SLUG, DRY_RUN, GH_TOKEN, ORGWAVE_BRANCH
 set -euo pipefail
 
 : "${TARGET_REPO_DIR:?TARGET_REPO_DIR not set}"

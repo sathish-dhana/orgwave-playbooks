@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
-"""Print a https://cursor.com/link/prompt URL to open Cursor with an OrgWave prompt prefilled.
+"""Emit a Cursor prompt deeplink (https://cursor.com/link/prompt or cursor://…).
 
-Usage:
-  python3 scripts/generate-orgwave-deeplink.py example-migration
-  python3 scripts/generate-orgwave-deeplink.py my-playbook --web   # default is web (GitHub-friendly)
-
-Cursor docs: https://cursor.com/docs/reference/deeplinks
-Deeplinks do not auto-run; the user reviews and confirms in Cursor.
+https://cursor.com/docs/reference/deeplinks — user must confirm; links do not auto-run.
 """
 from __future__ import annotations
 

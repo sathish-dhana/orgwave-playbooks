@@ -1,7 +1,4 @@
-# Lists org repositories using the GitHub API (same source as GitHub MCP in Cursor).
-# Does NOT run Cursor or MCP — runners cannot attach to your IDE. Use the artifact + Cursor Agent next.
-#
-# Token: ORGWAVE_PAT if set (broader org access); otherwise GITHUB_TOKEN (works for many org repos).
+# Lists repos via GitHub API + optional playbooks/<id>/discovery.json — see docs/reference.md.
 
 name: OrgWave — discover repos
 
@@ -36,9 +33,7 @@ jobs:
           PLAYBOOK_ID: ${{ inputs.playbook_id }}
           GH_TOKEN: ${{ secrets.ORGWAVE_PAT }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          chmod +x scripts/discover-repos.sh
-          scripts/discover-repos.sh
+        run: scripts/discover-repos.sh
 
       - name: Job summary (copy into Cursor or pick repos)
         run: |
@@ -57,7 +52,7 @@ jobs:
             echo ""
             echo "### Next step (Cursor)"
             echo ""
-            echo "Download artifact **discovery-output** (JSON) or use the table above. In Cursor with **Agent + GitHub MCP**, run the playbook on the repos you choose — Actions cannot run Cursor or MCP."
+            echo "Download artifact **discovery-output** (JSON) or use the table above, then continue in **Cursor** with the playbook (Agent + GitHub MCP)."
             echo ""
             echo "Example: *OrgWave: playbook \`${{ inputs.playbook_id }}\` — apply to repos 1,3,5 from the discovery run I just did* (or paste \`owner/repo\` list)."
           } >> "$GITHUB_STEP_SUMMARY"
