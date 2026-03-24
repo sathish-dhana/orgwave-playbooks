@@ -6,7 +6,7 @@
 
 ## GitHub token (MCP vs `gh`)
 
-The **github** server runs **`orgwave/scripts/github-mcp-launch.sh`**, which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github` in this order:
+The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`node`** in **`.cursor/mcp.json`**), which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github` in this order:
 
 1. Already set (e.g. repo-root **`.env`** via **`envFile`** — copy **`.env.example`**).
 2. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
@@ -14,6 +14,18 @@ The **github** server runs **`orgwave/scripts/github-mcp-launch.sh`**, which set
 4. **`gh auth token`** if `gh` is installed and logged in (Homebrew paths are tried first).
 
 So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, export **`GITHUB_TOKEN`** or **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+
+### Pinned install (recommended — faster connect)
+
+Cold **`npx`** runs can take several seconds; some Cursor builds show **`Client closed`** / **empty offerings** while the client waits. **`github-mcp-launch.mjs`** prefers a pinned copy under **`orgwave/mcp-runtime/`** (spawns **`node`** on **`dist/index.js`** immediately). It avoids a shell wrapper calling **`gh`** on MCP’s stdin (that can cause **`Request timed out`** on initialize).
+
+One-time (from repo root):
+
+```bash
+cd orgwave/mcp-runtime && npm ci
+```
+
+Commit **`package-lock.json`** is already in the repo; **`node_modules/`** is gitignored. If you skip this step, the script still falls back to **`npx`**.
 
 ### Recommended: `GITHUB_TOKEN` + `~/.zshrc`
 
@@ -32,7 +44,7 @@ So **“`gh` works but GitHub MCP says Authentication Failed”** usually means 
 
    If you only click the Cursor icon in the Dock, macOS often **does not** load `~/.zshrc` into that process — use **`.env`** or ensure **`gh`** is logged in so the launch script can read a token.
 
-**Windows:** the launch script is **bash** — use **Git Bash** / **WSL**, or rely on **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`** only (no `gh` fallback unless `gh` is on `PATH` in that environment).
+**Windows:** **`node`** must be on `PATH` for **`github-mcp-launch.mjs`**. The **`npx`** fallback uses **`shell: true`** for **`npx.cmd`**. Prefer **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`** if **`gh`** is not available.
 
 ## Add a server
 

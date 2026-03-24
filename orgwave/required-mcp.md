@@ -26,14 +26,15 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 
 | Step | Why |
 |------|-----|
-| **Secrets** | **GitHub:** repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process (e.g. **`~/.zshrc`** + launch from that terminal), or **`gh auth login`** — **`orgwave/scripts/github-mcp-launch.sh`** maps these to the PAT the MCP server needs (see **`mcp-servers/README.md`**). Deeplinks cannot inject tokens. |
+| **Secrets** | **GitHub:** repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process (e.g. **`~/.zshrc`** + launch from that terminal), or **`gh auth login`** — **`orgwave/scripts/github-mcp-launch.mjs`** maps these to the PAT the MCP server needs (see **`mcp-servers/README.md`**). Deeplinks cannot inject tokens. |
+| **Pinned GitHub MCP** | Once per clone: **`cd orgwave/mcp-runtime && npm ci`** so the launcher spawns the pinned server with **`node`** (fast). Without it, **`npx`** cold starts may be slow enough that Cursor shows **empty offerings** / **Client closed** until retry. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
 | **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |
 | **Enable server** | If a server is **listed but disabled**, turn it **on** in Cursor (see **Enabling a disabled MCP server** below) so tools reach the agent. |
 
 ### If you already set tokens — is it “auto”?
 
-When **`GITHUB_TOKEN`**, **`GH_TOKEN`**, or repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`** reaches the MCP child, or **`gh auth token`** succeeds (after **`gh auth login`**), GitHub MCP can authenticate. The macOS **Dock** icon often does **not** load `~/.zshrc` — use **`open -a Cursor …`** from that shell, **`.env`**, or a logged-in **`gh`** so **`github-mcp-launch.sh`** can supply a PAT.
+When **`GITHUB_TOKEN`**, **`GH_TOKEN`**, or repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`** reaches the MCP child, or **`gh auth token`** succeeds (after **`gh auth login`**), GitHub MCP can authenticate. The macOS **Dock** icon often does **not** load `~/.zshrc` — use **`open -a Cursor …`** from that shell, **`.env`**, or a logged-in **`gh`** so **`github-mcp-launch.mjs`** can supply a PAT.
 
 ### Can Auto-run be set from a prompt / this repo?
 
@@ -108,6 +109,6 @@ Official **`@modelcontextprotocol/server-github`** does not ship a “list my re
 1. **File → Open Folder** and choose the **`orgwave-playbooks`** directory itself (the folder that contains **`orgwave/catalog.yaml`** and **`.cursor/mcp.json`**).
 2. **Command Palette → Developer: Reload Window** (or restart Cursor).
 3. Confirm **`.cursor/mcp.json`** contains **`mcpServers.github`**; if not, from repo root run **`python3 orgwave/scripts/build-mcp-json.py`** and reload again.
-4. Ensure a PAT reaches GitHub MCP: **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`gh auth login`** (see **`mcp-servers/README.md`** and **`orgwave/scripts/github-mcp-launch.sh`**).
+4. Ensure a PAT reaches GitHub MCP: **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`gh auth login`** (see **`mcp-servers/README.md`** and **`orgwave/scripts/github-mcp-launch.mjs`**).
 
 After that, **github** should appear alongside any **user-level** MCP servers. If **github** is listed but **disabled**, use **Enabling a disabled MCP server** above. Until the server is available, OrgWave correctly falls back to **`gh`** or the GitHub REST API.

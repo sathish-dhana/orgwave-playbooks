@@ -37,7 +37,7 @@ Two common causes:
 
 ## Flow
 
-1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP is started via **`orgwave/scripts/github-mcp-launch.sh`**, which supplies a PAT from repo **`.env`** (`GITHUB_PERSONAL_ACCESS_TOKEN`), **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, or **`gh auth token`** if logged in. Follow **MCP-first** above; **never block OrgWave on MCP** — fall back to **`gh`** / GitHub REST API / **`discovery-output.json`** if MCP is missing, disabled for the user, or fails.
+1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP is started via **`node orgwave/scripts/github-mcp-launch.mjs`**, which supplies a PAT from repo **`.env`** (`GITHUB_PERSONAL_ACCESS_TOKEN`), **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, or **`gh auth token`** if logged in (without consuming MCP stdio). Follow **MCP-first** above; **never block OrgWave on MCP** — fall back to **`gh`** / GitHub REST API / **`discovery-output.json`** if MCP is missing, disabled for the user, or fails.
 2. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
 3. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
 4. Discovery: MCP first when usable; else `gh` / JSON — no extra MCP config inside playbooks.

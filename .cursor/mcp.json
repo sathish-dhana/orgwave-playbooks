@@ -2,8 +2,10 @@
   "mcpServers": {
     "github": {
       "type": "stdio",
-      "command": "${workspaceFolder}/orgwave/scripts/github-mcp-launch.sh",
-      "args": [],
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/orgwave/scripts/github-mcp-launch.mjs"
+      ],
       "envFile": "${workspaceFolder}/.env",
       "env": {
         "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",

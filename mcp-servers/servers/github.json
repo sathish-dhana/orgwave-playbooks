@@ -1,7 +1,7 @@
 {
   "type": "stdio",
-  "command": "${workspaceFolder}/orgwave/scripts/github-mcp-launch.sh",
-  "args": [],
+  "command": "node",
+  "args": ["${workspaceFolder}/orgwave/scripts/github-mcp-launch.mjs"],
   "envFile": "${workspaceFolder}/.env",
   "env": {
     "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
@@ -11,9 +11,10 @@
     "title": "GitHub",
     "purpose": "List/filter org repos and GitHub metadata during OrgWave discovery.",
     "env": [
+      "Optional: run `cd orgwave/mcp-runtime && npm ci` once for fast MCP startup (avoids slow npx cold install).",
       "GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (envFile), or",
       "GITHUB_TOKEN or GH_TOKEN in the Cursor process env (e.g. ~/.zshrc + launch Cursor from that terminal), or",
-      "gh logged in (github-mcp-launch.sh runs `gh auth token` when no PAT vars are set)"
+      "gh logged in (github-mcp-launch.mjs runs `gh auth token` with stdin detached so MCP stdio is not consumed)"
     ],
     "permissionsAllowlistHint": "github:*"
   }

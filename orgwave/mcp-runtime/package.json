@@ -1,0 +1,8 @@
+{
+  "name": "orgwave-mcp-runtime",
+  "private": true,
+  "description": "Pinned @modelcontextprotocol/server-github for Cursor MCP (avoids slow npx cold starts).",
+  "dependencies": {
+    "@modelcontextprotocol/server-github": "2025.4.8"
+  }
+}
