@@ -19,10 +19,10 @@ description: Test playbook — GitHub MCP (or gh), list repos you can push to, s
 ## 3. Discovery
 
 0. **MCP scope:** GitHub MCP is **not** started by this playbook. Cursor only loads it from **`.cursor/mcp.json`** when the **workspace root** is the **orgwave-playbooks** repo folder. If the user opened a parent directory, **Tools & MCP** may show only global/other servers—point them to **`orgwave/required-mcp.md`** (*GitHub MCP missing in Cursor*) and use **`gh`** or GitHub REST API + **`GITHUB_TOKEN`**; do not block.
-1. **Connect** using **GitHub MCP** when those tools are **actually available in the agent session** (`mcp-servers/servers/` + `orgwave/required-mcp.md`); otherwise use **`gh`** or the REST API — do not block on MCP.
+1. **MCP-first (orchestrator):** If GitHub MCP tools exist **in this chat session**, use them where they match the operation (e.g. **`search_repositories`** for discovery). **Do not** duplicate the same GitHub call via shell when MCP can do it. The agent **cannot** enable a disabled server—if **github** is off, tell the user to enable it and **Developer: Reload Window** per **`orgwave/required-mcp.md`** (*Enabling a disabled MCP server*, *Making the agent actually use GitHub MCP*).
 2. **List repositories** the token can **push** to, for the scope the user names (their user account, specific org(s), or “all my repos”):
-   - Prefer GitHub MCP tools that list/search repos with permission metadata.
-   - Fallback: e.g. `gh api user/repos --paginate` (and filter where `.permissions.push == true`), and/or `gh api user/orgs` + org repos with role allowing push — use judgment so the table only includes **push-capable** repos.
+   - **Push-accurate list:** `@modelcontextprotocol/server-github` has no **`GET /user/repos`-style** tool with **`permissions.push`**. Use **`gh api user/repos --paginate`** (filter `.permissions.push == true`) or **REST + token** for that requirement.
+   - **MCP-only discovery (approximate):** e.g. **`search_repositories`** with `user:<login>` (paginate); then **note** if push metadata was not verified, or follow with REST for the final push-filtered table.
 3. Print a **numbered** table: `#`, `full_name`, default branch, `html_url`, and a short note **push: yes** (or omit non-push).
 4. **Stop** until the user selects repos (numbers, `owner/repo` list, or “all in table”).
 
