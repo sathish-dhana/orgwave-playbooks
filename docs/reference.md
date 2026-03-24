@@ -1,5 +1,15 @@
 # OrgWave reference
 
+## Run in Cursor (all playbooks)
+
+Buttons for each entry in `catalog.yaml` live in **[run-in-cursor.md](run-in-cursor.md)**. After editing the catalog, run:
+
+```bash
+python3 scripts/generate-orgwave-deeplink.py --write-docs
+```
+
+---
+
 ## `discovery.json` (optional)
 
 Place at `playbooks/<id>/discovery.json`. Used by **OrgWave — discover repos** and `scripts/discover-repos.sh`.

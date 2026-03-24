@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Emit a Cursor prompt deeplink (https://cursor.com/link/prompt or cursor://…).
-
-https://cursor.com/docs/reference/deeplinks — user must confirm; links do not auto-run.
-"""
+"""Cursor prompt deeplinks for OrgWave — https://cursor.com/docs/reference/deeplinks (confirm to run)."""
 from __future__ import annotations
 
 import argparse
+import re
 import urllib.parse
+from pathlib import Path
 
 MAX_LEN = 8000
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CATALOG = REPO_ROOT / "catalog.yaml"
+RUN_MD = REPO_ROOT / "docs" / "run-in-cursor.md"
 
 
 def build_prompt(playbook_id: str) -> str:
@@ -20,26 +22,101 @@ def build_prompt(playbook_id: str) -> str:
 4. For each selected service: apply the playbook, run tests if applicable, push branches, open one PR per service. Do not merge."""
 
 
+def web_url(playbook_id: str) -> str:
+    q = urllib.parse.urlencode({"text": build_prompt(playbook_id)})
+    url = f"https://cursor.com/link/prompt?{q}"
+    if len(url) > MAX_LEN:
+        raise ValueError(f"URL length {len(url)} exceeds {MAX_LEN} for playbook {playbook_id!r}")
+    return url
+
+
+def desktop_url(playbook_id: str) -> str:
+    q = urllib.parse.urlencode({"text": build_prompt(playbook_id)})
+    url = f"cursor://anysphere.cursor-deeplink/prompt?{q}"
+    if len(url) > MAX_LEN:
+        raise ValueError(f"Desktop URL length {len(url)} exceeds {MAX_LEN} for playbook {playbook_id!r}")
+    return url
+
+
+def parse_catalog(path: Path) -> list[tuple[str, str | None]]:
+    """Return [(id, name), ...] from catalog.yaml (no PyYAML dependency)."""
+    text = path.read_text(encoding="utf-8")
+    chunks = re.split(r"(?m)^\s*-\s+id:\s*", text)
+    out: list[tuple[str, str | None]] = []
+    for chunk in chunks[1:]:
+        first, _, rest = chunk.partition("\n")
+        pid = first.strip().strip("\"'")
+        if not pid or pid.startswith("#"):
+            continue
+        nm = re.search(r"(?m)^\s+name:\s*(.+)$", chunk)
+        name = nm.group(1).strip().strip("\"'") if nm else None
+        out.append((pid, name))
+    return out
+
+
+def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
+    lines = [
+        "# Run in Cursor",
+        "",
+        "One click opens Cursor with a **prefilled prompt** for that playbook (you still confirm before it runs).",
+        "",
+        "| Playbook | Run |",
+        "|----------|-----|",
+    ]
+    for pid, name in entries:
+        label = name or pid
+        url = web_url(pid)
+        badge = f"[![Run](https://img.shields.io/badge/Run_in-Cursor-111111?style=flat-square)]({url})"
+        lines.append(f"| **{label}** (`{pid}`) | {badge} |")
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "Regenerate this file after you change `catalog.yaml`:",
+            "",
+            "```bash",
+            "python3 scripts/generate-orgwave-deeplink.py --write-docs",
+            "```",
+            "",
+        ]
+    )
+    return "\n".join(lines) + "\n"
+
+
 def main() -> None:
-    p = argparse.ArgumentParser(description="Generate Cursor prompt deeplink for OrgWave")
-    p.add_argument("playbook_id", help="Playbook folder name under playbooks/")
+    p = argparse.ArgumentParser(description="Generate Cursor deeplinks for OrgWave playbooks")
+    p.add_argument("playbook_id", nargs="?", help="Single playbook id (folder under playbooks/)")
+    p.add_argument("--desktop", action="store_true", help="Emit cursor:// URL for one id")
     p.add_argument(
-        "--desktop",
+        "--write-docs",
         action="store_true",
-        help="Use cursor:// URL instead of https://cursor.com/link/ (for local use)",
+        help=f"Write docs/run-in-cursor.md for every playbook in catalog.yaml",
+    )
+    p.add_argument(
+        "--print-all",
+        action="store_true",
+        help="Print markdown table to stdout (same as --write-docs but no file)",
     )
     args = p.parse_args()
 
-    text = build_prompt(args.playbook_id)
-    q = urllib.parse.urlencode({"text": text})
-    if args.desktop:
-        url = f"cursor://anysphere.cursor-deeplink/prompt?{q}"
-    else:
-        url = f"https://cursor.com/link/prompt?{q}"
+    if args.write_docs or args.print_all:
+        entries = parse_catalog(CATALOG)
+        body = markdown_buttons(entries)
+        if args.print_all:
+            print(body, end="")
+        else:
+            RUN_MD.parent.mkdir(parents=True, exist_ok=True)
+            RUN_MD.write_text(body, encoding="utf-8")
+            print(f"Wrote {RUN_MD}")
+        return
 
-    if len(url) > MAX_LEN:
-        raise SystemExit(f"URL length {len(url)} exceeds Cursor limit {MAX_LEN}; shorten the prompt template.")
-    print(url)
+    if not args.playbook_id:
+        p.error("pass playbook_id, or use --write-docs / --print-all")
+    if args.desktop:
+        print(desktop_url(args.playbook_id))
+    else:
+        print(web_url(args.playbook_id))
 
 
 if __name__ == "__main__":

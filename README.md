@@ -14,15 +14,14 @@ Central **playbook** definitions for org-wide tech changes: discover candidate G
 | Path | When to use |
 |------|-------------|
 | **Cursor Agent** | Real migrations: multi-file edits, judgment, tests. Open this repo, use the orchestrator rule, name a playbook from `catalog.yaml`. |
-| **Run in Cursor** (deeplink) | Same as above, with a [prefilled prompt](https://cursor.com/docs/reference/deeplinks) from the button below. You still confirm before the agent runs. |
+| **Run in Cursor** (deeplink) | Same as above, with a [prefilled prompt](https://cursor.com/docs/reference/deeplinks). **[All playbooks → docs/run-in-cursor.md](docs/run-in-cursor.md)** — one button per `catalog.yaml` entry. |
 | **Actions → Discover** | Batch list repos via GitHub API → job summary + `discovery-output.json` artifact → continue in Cursor. |
 | **Actions → Run playbook** | Deterministic shell only: `playbooks/<id>/scripts/gha-apply.sh`. No Cursor / no LLM. |
 
-[![Run in Cursor — example-migration](https://img.shields.io/badge/Run_in-Cursor-111111?style=for-the-badge)](https://cursor.com/link/prompt?text=You+are+running+OrgWave.+Open+this+orgwave-playbooks+repository+as+the+Cursor+workspace+%28clone+it+first+if+needed%29.%0A%0A1.+Follow+.cursor%2Frules%2Forgwave-orchestrator.mdc+and+load+playbook+id+%60example-migration%60+from+catalog.yaml+and+playbooks%2Fexample-migration%2FSKILL.md.%0A2.+Ask+me+for+the+GitHub+org+if+unknown.+Use+global+GitHub+MCP+to+list%2Ffilter+repos+per+the+playbook+%28or+use+a+discovery+JSON+file+from+the+latest+Actions+run+if+I+attach+it%29.%0A3.+Show+a+numbered+table+of+candidate+services+and+STOP+until+I+select+which+repos+to+run.%0A4.+For+each+selected+service%3A+apply+the+playbook%2C+run+tests+if+applicable%2C+push+branches%2C+open+one+PR+per+service.+Do+not+merge.)
-
 ```bash
-python3 scripts/generate-orgwave-deeplink.py YOUR_PLAYBOOK_ID        # https://cursor.com/link/…
-python3 scripts/generate-orgwave-deeplink.py YOUR_PLAYBOOK_ID --desktop  # cursor://…
+python3 scripts/generate-orgwave-deeplink.py --write-docs   # refresh docs/run-in-cursor.md from catalog.yaml
+python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID # one-off https://cursor.com/link/…
+python3 scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop     # cursor://…
 ```
 
 ## Repository layout
@@ -37,13 +36,15 @@ python3 scripts/generate-orgwave-deeplink.py YOUR_PLAYBOOK_ID --desktop  # curso
 | `.github/workflows/orgwave-discover.yml` | Manual discover run |
 | `.github/workflows/orgwave-run.yml` | Manual scripted apply per repo list |
 | `scripts/discover-repos.sh` | Local discover: `ORG=my-org PLAYBOOK_ID=my-playbook ./scripts/discover-repos.sh` |
-| `scripts/generate-orgwave-deeplink.py` | Build “Run in Cursor” URLs |
+| `scripts/generate-orgwave-deeplink.py` | Deeplinks; `--write-docs` → [docs/run-in-cursor.md](docs/run-in-cursor.md) |
+| `docs/run-in-cursor.md` | **Run** buttons for every playbook in `catalog.yaml` |
 
 ## Add a playbook
 
 1. `cp -r playbooks/_template playbooks/<id>`
 2. Edit `playbooks/<id>/SKILL.md` and add a row to `catalog.yaml`.
-3. Optional: `discovery.json`, `scripts/gha-apply.sh`, and a deeplink in your fork’s README (`generate-orgwave-deeplink.py`).
+3. Run `python3 scripts/generate-orgwave-deeplink.py --write-docs` so **docs/run-in-cursor.md** includes the new playbook’s button.
+4. Optional: `discovery.json`, `scripts/gha-apply.sh`.
 
 Details: **[docs/reference.md](docs/reference.md)**.
 
