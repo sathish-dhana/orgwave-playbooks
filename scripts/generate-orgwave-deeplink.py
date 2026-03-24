@@ -16,9 +16,10 @@ PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
 README_MARKER = "<!-- orgwave-generated -->"
 
 # Single place for “Run in Cursor” badge markup (used for every playbook row).
-RUN_BUTTON_ALT = "Run"
+# for-the-badge = larger; green background (hex without # per shields.io).
+RUN_BUTTON_ALT = "Run in Cursor"
 RUN_BUTTON_BADGE_IMAGE = (
-    "https://img.shields.io/badge/Run_in-Cursor-111111?style=flat-square"
+    "https://img.shields.io/badge/Run_in-Cursor-22c55e?style=for-the-badge&logo=cursor&logoColor=white"
 )
 
 
