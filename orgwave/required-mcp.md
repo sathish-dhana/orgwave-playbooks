@@ -29,6 +29,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 | **Secrets** | **GitHub:** `export GITHUB_TOKEN=…` in **`~/.zshrc`**, then **`source ~/.zshrc`** and **start Cursor from that terminal** so MCP sees it; or optional repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** (see **`.env.example`**). Deeplinks cannot inject tokens. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
 | **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |
+| **Enable server** | If a server is **listed but disabled**, turn it **on** in Cursor (see **Enabling a disabled MCP server** below) so tools reach the agent. |
 
 ### If you already set tokens — is it “auto”?
 
@@ -60,6 +61,19 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 3. Update **`orgwave/required-mcp.md`** tables if the default set changes.
 4. If deeplink wording must change, edit **`build_prompt()`** in `orgwave/scripts/generate-orgwave-deeplink.py` and run **`python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`**.
 
+## Enabling a disabled MCP server
+
+**Symptom:** The server **appears** under **Cursor Settings → Tools & MCP** (names may vary slightly by Cursor version), but it is **off**, **disabled**, or **not running** — so the agent gets **no tools** from that server even though **`mcp-servers/servers/<id>.json`** and **`.cursor/mcp.json`** are correct.
+
+**Do this:**
+
+1. Open **Cursor Settings** → **Tools & MCP** (or the MCP section in **Features**).
+2. Find the server by its **id** — the same key as in **`.cursor/mcp.json`** under **`mcpServers`** (e.g. **`github`** for GitHub). Project servers from **orgwave-playbooks** only load when the workspace folder is this repo root (see *GitHub MCP missing in Cursor*).
+3. **Enable** / turn **on** the server. If Cursor shows an error, fix **env vars** (see **`mcp-servers/README.md`** and the **`_orgwave.env`** list in that server’s JSON) and try again.
+4. **Command Palette → Developer: Reload Window** if tools still do not show for the agent.
+
+**For agents:** Prefer MCP once tools are available; if the user says the server was disabled, point them here and continue with **`gh`** / REST / **`discovery-output.json`** until they enable it — do not block the playbook on UI toggles.
+
 ## GitHub MCP missing in Cursor
 
 **Symptom:** **Tools & MCP** lists other servers (e.g. Grafana, New Relic) but **no `github`** entry, or the agent never sees GitHub MCP tools.
@@ -73,4 +87,4 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 3. Confirm **`.cursor/mcp.json`** contains **`mcpServers.github`**; if not, from repo root run **`python3 orgwave/scripts/build-mcp-json.py`** and reload again.
 4. Ensure **`GITHUB_TOKEN`** reaches the Cursor process (see **`mcp-servers/README.md`**) or use repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`** per **`.env.example`**.
 
-After that, **github** should appear alongside any **user-level** MCP servers. Until then, OrgWave correctly falls back to **`gh`** or the GitHub REST API.
+After that, **github** should appear alongside any **user-level** MCP servers. If **github** is listed but **disabled**, use **Enabling a disabled MCP server** above. Until the server is available, OrgWave correctly falls back to **`gh`** or the GitHub REST API.

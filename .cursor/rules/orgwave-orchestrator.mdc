@@ -11,6 +11,7 @@ Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.y
 
 - A playbook run **does not** install or “connect” MCP servers. Cursor loads MCP from **`.cursor/mcp.json` at the workspace root** only.
 - **GitHub MCP** is defined **in this repo** (`mcp-servers/servers/github.json` → run **`python3 orgwave/scripts/build-mcp-json.py`** → **`.cursor/mcp.json`**). It appears under **Tools & MCP** only when **File → Open Folder** points at the **orgwave-playbooks** repo root—not a parent directory (e.g. `IdeaProjects`) and not user-global MCP alone.
+- If **github** (or any project MCP) is **listed but disabled**, tell the user to **enable** it under **Cursor Settings → Tools & MCP** and reload; see **`orgwave/required-mcp.md`** → *Enabling a disabled MCP server*.
 - If the agent has **no** in-session GitHub MCP tools (e.g. only Grafana/New Relic show in settings), **tell the user** to open **`…/orgwave-playbooks`** as the workspace, run **`Developer: Reload Window`**, and see **`orgwave/required-mcp.md`** → *GitHub MCP missing in Cursor*. Then continue with **`gh`** / GitHub REST API / **`discovery-output.json`** without blocking.
 
 ## Flow

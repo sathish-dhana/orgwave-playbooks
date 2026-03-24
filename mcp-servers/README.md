@@ -97,6 +97,10 @@ Follow [Cursor MCP — Remote Server](https://cursor.com/docs/context/mcp) for O
 - If **`_orgwave.env`** vars are available to Cursor’s MCP process, that server **can** auto-start and tools appear to the agent.
 - If not, OrgWave **does not block** — fall back to `gh`, other MCP servers, or `discovery-output.json` per **`orgwave/required-mcp.md`** and the playbook **`SKILL.md`**.
 
+## Enabling a server that is disabled in Cursor
+
+A server can be **defined** in **`.cursor/mcp.json`** but **turned off** in the editor. In **Cursor Settings → Tools & MCP**, find the server by **`mcpServers.<id>`** (e.g. **`github`**) and **enable** it; reload the window if tools do not appear. Full steps and agent behaviour: **`orgwave/required-mcp.md`** → *Enabling a disabled MCP server*.
+
 ## See also
 
 - **`orgwave/required-mcp.md`** — policy (non-blocking, fallbacks).
