@@ -41,13 +41,14 @@ RUN_BUTTON_BADGE_IMAGE = _shields_run_badge_url()
 DEEPLINK_PROMPT_TEMPLATE = (
     "OrgWave: open orgwave-playbooks as workspace. "
     "Run orchestrator rule and playbook {playbook_id}. "
-    "Read orgwave/catalog.yaml and playbooks/{playbook_id}/SKILL.md. "
-    "If gh is missing install it for example brew install gh on macOS or call /opt/homebrew/bin/gh when PATH omits Homebrew. "
-    "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file branch and PR steps. "
-    "Use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
-    "If GitHub MCP auth fails see mcp-servers README for PAT env file options. "
-    "Resolve default branch from repos API. If get_file_contents create_branch or PR base returns Not Found try branch master then main. "
-    "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
+    "Read orgwave/catalog.yaml playbooks/{playbook_id}/SKILL.md and orgwave/required-mcp.md. "
+    "If gh is missing install it for example brew install gh on macOS or use /opt/homebrew/bin/gh when PATH omits Homebrew for clone branch and push. "
+    "When the playbook and required-mcp.md say GitHub MCP is required for listing or PRs use search_repositories and create_pull_request whenever github tools exist in this session. "
+    "Do not use gh api user repos gh repo list or gh pr create for those steps when MCP tools are available and the playbook requires MCP. "
+    "If MCP is required but tools are missing disabled or auth fails stop with orgwave/required-mcp.md GitHub MCP gate checklist and mcp-servers README PAT then user enables server and Reload Window. "
+    "Note MCP search does not include permissions push per row unless you add gh after user asks. "
+    "Resolve default branch from repos API. If Not Found on file branch or PR base try master then main. "
+    "Discover repos numbered table stop for my selection one PR per repo do not merge."
 )
 
 

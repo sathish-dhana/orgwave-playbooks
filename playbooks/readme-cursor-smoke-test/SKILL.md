@@ -17,10 +17,10 @@ description: Test playbook — GitHub MCP for repo listing and PR only; gh/git f
 
 ## 3. Discovery
 
-0. **MCP scope:** GitHub MCP is **not** started by this playbook. Cursor only loads it from **`.cursor/mcp.json`** when the **workspace root** is the **orgwave-playbooks** repo folder. If the user opened a parent directory, point them to **`orgwave/required-mcp.md`** (*GitHub MCP missing in Cursor*).
-1. **Listing — GitHub MCP only (when session has GitHub MCP):** Use **`search_repositories`** only — do **not** use **`gh api user/repos`**, **`gh repo list`**, or raw REST **for discovery** when GitHub MCP tools are available. Paginate (e.g. `user:<login>` for “my repos”, or `org:<org>`). **Do not** use MCP **`get_file_contents`**, **`create_branch`**, **`create_or_update_file`**, or **`push_files`** in this playbook.
-2. **Listing — fallback when GitHub MCP is missing or fails:** Use **`gh api user/repos --paginate`** (filter `.permissions.push == true`, not archived) or **REST + `GITHUB_TOKEN`**. If **`gh` is not on PATH**, try **`/opt/homebrew/bin/gh`** / **`/usr/local/bin/gh`**, or **`brew install gh`** on macOS when Homebrew exists.
-3. Print a **numbered** table: `#`, `full_name`, default branch (from search/API field when present), `html_url`. If the list came from **`search_repositories`**, add a column or footnote: **push not verified per row (MCP search)**.
+0. **GitHub MCP gate:** Before listing, confirm the session can call GitHub MCP **`search_repositories`**. If **no** GitHub MCP tools are available, or **`search_repositories`** returns **401/403** after **one** retry, **stop** and paste the checklist from **`orgwave/required-mcp.md`** → *GitHub MCP gate — checklist* (workspace root **orgwave-playbooks**, enable **github** under Tools & MCP, PAT via **`.env`** / **`github-mcp.env`** / **`gh auth login`**, **Developer: Reload Window**). **Do not** run **`gh api user/repos`** or shell discovery in that same turn unless the user **explicitly** opts out after seeing the gate (e.g. “use gh only”).
+1. **Listing — GitHub MCP (required when tools exist):** Use **`search_repositories`** with pagination until you have the intended set (e.g. `user:<login>` for “my repos”, `org:<org>`, add `archived:false` / `fork:false` in the query when useful). **Do not** use **`gh api user/repos`**, **`gh repo list`**, or raw REST **for discovery** when MCP tools are in session — that bypasses the configured GitHub MCP server. **Do not** use MCP **`get_file_contents`**, **`create_branch`**, **`create_or_update_file`**, or **`push_files`** in this playbook.
+2. **Listing — only after user opt-out:** If the user confirmed they cannot use MCP and asked to continue with CLI only, use **`gh api user/repos --paginate`** (filter `.permissions.push == true`, not archived) or **REST + `GITHUB_TOKEN`**. If **`gh` is not on PATH**, try **`/opt/homebrew/bin/gh`** / **`/usr/local/bin/gh`**, or **`brew install gh`** on macOS when Homebrew exists.
+3. Print a **numbered** table: `#`, `full_name`, default branch (from search result when present), `html_url`. Always add a footnote when the list came from **`search_repositories`**: **push not verified per row (MCP search)**. If you merged push-verified data from **`gh`** after user opt-out, say so in the footnote.
 4. **Stop** until the user selects repos (numbers, `owner/repo` list, or “all in table”).
 
 ## 4. Execution
@@ -39,7 +39,8 @@ Per **selected** repo (clone into workspace or temp path; respect user preferenc
 
 ## 5. PR
 
-- **Open the PR with GitHub MCP only** when session tools exist: **`create_pull_request`** (`owner`, `repo`, `title`, `body`, `head`, `base`). If MCP fails after one retry, fall back to **`gh pr create`**.
+- **GitHub MCP gate:** If **`create_pull_request`** is not available, or it returns **401/403** after **one** retry, **stop** with the same **`orgwave/required-mcp.md`** gate checklist — do **not** open the PR with **`gh pr create`** in that turn unless the user **explicitly** opted out of MCP for this run.
+- **Open the PR with GitHub MCP** when tools exist: **`create_pull_request`** (`owner`, `repo`, `title`, `body`, `head`, `base`). After user opt-out only, use **`gh pr create`**.
 - **Title:** `readme-cursor-smoke-test: README smoke test (OrgWave)`
 - **Body:** Short explanation; link this **orgwave-playbooks** repo and playbook id **`readme-cursor-smoke-test`**; **do not merge** without owner review.
 
@@ -47,7 +48,7 @@ Per **selected** repo (clone into workspace or temp path; respect user preferenc
 
 - [ ] Discovery used **`search_repositories`** (MCP) when GitHub MCP was available; no duplicate listing via **`gh api`** in that case
 - [ ] File/branch/push used **`gh`**/**git** only (no MCP file/branch/push tools)
-- [ ] PR opened with **`create_pull_request`** (MCP) when available, else **`gh pr create`**
+- [ ] PR opened with **`create_pull_request`** (MCP) when tools exist, else gate or user opt-out then **`gh pr create`**
 - [ ] User explicitly selected targets
 - [ ] One PR per repo; agent did **not** merge
 

@@ -2,13 +2,12 @@
 
 This file is the **policy** for how the agent uses MCP. **Machine definitions** live in the top-level **`mcp-servers/`** folder (see below).
 
-## Policy: do not block the user on MCP
+## Policy: general vs GitHub MCP gate
 
-OrgWave is designed so **discovery and playbooks keep going** even if MCP is down or misconfigured:
-
+- **General:** Other servers and playbooks that do **not** bind discovery/PRs to GitHub MCP may still use **`gh`**, REST, or **`discovery-output.json`** when MCP is awkward or missing — see each **`playbooks/<id>/SKILL.md`**.
+- **GitHub MCP gate (listing + PR):** Playbooks such as **`readme-cursor-smoke-test`** **require** GitHub MCP **`search_repositories`** for discovery and **`create_pull_request`** for opening PRs **when** those tools exist in the agent session. If GitHub MCP tools are **missing**, **disabled**, or return **auth errors** after a retry, the agent **stops** and sends the **checklist below** (workspace, enable server, PAT, reload). It **does not** substitute **`gh api user/repos`** or **`gh pr create`** in the same turn unless the user **explicitly** opts out after seeing the gate (e.g. “continue without MCP”).
 - **`mcp-servers/servers/*.json`** describe each server; **`python3 orgwave/scripts/build-mcp-json.py`** merges them into **`.cursor/mcp.json`**, which Cursor loads. When env tokens are visible to Cursor, those servers **can** auto-start.
-- If MCP is unavailable, errors, or the user has not approved tool calls, the agent must **`gh`** and/or **`discovery-output.json`** **without stopping** to fix MCP first.
-- The only intentional **stop** in the flow is **after** listing candidates, until the user **selects which repos** to change (or merge) — not for MCP setup.
+- The usual **stop** for repo selection (after the numbered table) still applies — that is separate from the MCP gate.
 
 ## Where things live
 
@@ -18,7 +17,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 | **`mcp-servers/servers/<id>.json`** | **Source of truth** per MCP server (one file per `<id>`). |
 | **`orgwave/scripts/build-mcp-json.py`** | Merges `servers/*.json` → **`.cursor/mcp.json`**. Run after adding/editing server files. |
 | **`.cursor/mcp.json`** | **Generated** — Cursor’s project MCP file ([docs](https://cursor.com/docs/context/mcp)). Commit it after running the script. |
-| **`orgwave/required-mcp.md`** (this file) | **Behaviour** — non-blocking, fallbacks, auto-run notes. |
+| **`orgwave/required-mcp.md`** (this file) | **Behaviour** — MCP gate, fallbacks, auto-run notes. |
 
 ## What can be automated?
 
@@ -29,7 +28,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 | **Secrets** | **GitHub:** **`github-mcp-launch.mjs`** sets the PAT: **`GITHUB_PERSONAL_ACCESS_TOKEN`** from **`.env`** wins if set; otherwise (by default) **`gh auth token`** before **`GITHUB_TOKEN`** / **`GH_TOKEN`** so MCP matches terminal **`gh`**. **`github-mcp.env`** and **`.zshrc`** merge into **empty** keys only. **`ORGWAVE_MCP_PREFER_ENV_TOKEN=1`** forces env tokens before **`gh`**. See **`mcp-servers/README.md`**. Deeplinks cannot inject tokens. |
 | **Pinned GitHub MCP** | Once per clone: **`cd orgwave/mcp-runtime && npm ci`** so the launcher spawns the pinned server with **`node`** (fast). Without it, **`npx`** cold starts may be slow enough that Cursor shows **empty offerings** / **Client closed** until retry. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
-| **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |
+| **Tool approval** | Cursor may prompt per tool; for **GitHub MCP gate** playbooks, retry once then **gate message** — not silent **`gh`** listing/PR unless the user opts out. |
 | **Enable server** | If a server is **listed but disabled**, turn it **on** in Cursor (see **Enabling a disabled MCP server** below) so tools reach the agent. |
 
 ### If you already set tokens — is it “auto”?
@@ -53,7 +52,17 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 ## Rules for playbooks
 
 - Do **not** embed MCP server commands in playbooks; add **`mcp-servers/servers/<id>.json`** and merge.
-- The orchestrator always allows **`gh`** / **`discovery-output.json`** as discovery fallbacks.
+- For **GitHub MCP gate** playbooks, **`gh`** / **`discovery-output.json`** are fallbacks **only** after the user confirms MCP cannot be used or has fixed setup and asked to continue with an alternate path.
+
+## GitHub MCP gate — checklist for the agent to paste when tools are missing or auth fails
+
+1. **Workspace:** **File → Open Folder** → the **`orgwave-playbooks`** repo root (folder containing **`orgwave/catalog.yaml`** and **`.cursor/mcp.json`**), not a parent monorepo tree.
+2. **Enable server:** **Cursor Settings → Tools & MCP** → turn **on** the **`github`** server (same id as **`mcpServers.github`**).
+3. **PAT:** Set a valid token so the MCP child receives it — see **`mcp-servers/README.md`**: repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`~/.cursor/github-mcp.env`**, or **`gh auth login`** (launcher prefers **`gh auth token`** by default). Fix **401** vs **403** per the README table.
+4. **Reload:** **Command Palette → Developer: Reload Window**, then **send a new message** so GitHub tools attach to the session.
+5. **Optional:** **`cd orgwave/mcp-runtime && npm ci`** for a fast pinned GitHub MCP server.
+
+After this, the agent should use **`search_repositories`** and **`create_pull_request`** again — not **`gh`** for those steps when MCP works.
 
 ## Changing MCP servers
 
@@ -70,13 +79,13 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, docume
 |-----|------------|
 | **You (user)** | Workspace = **orgwave-playbooks** root; **Tools & MCP** → **github** **on**; **Developer: Reload Window** after toggling or editing **`mcp.json`**. |
 | **You (user)** | Approve GitHub tool prompts when asked, or add allowlist patterns (e.g. **`github:*`**) via Cursor permissions docs — see **`mcp-servers/README.md`**. |
-| **Agent** | Follow **`.cursor/rules/orgwave-orchestrator.mdc`** → **MCP-first**: use GitHub MCP tools when they exist in the session for that operation; use **`gh`** / REST only when no tool fits or MCP fails. |
+| **Agent** | Follow **`.cursor/rules/orgwave-orchestrator.mdc`**: **MCP-first** for listing/PR on gate playbooks; use **`gh`** / REST for clone/push and for discovery/PR **only** when MCP tools are absent after the gate or the user opts out. |
 
 **Important:** Nothing in this repo can **programmatically enable** a disabled MCP server. **You** flip the toggle; then **reload**; the **next** agent turn gets the tools.
 
-### Why discovery sometimes still uses REST
+### Push verification vs MCP listing
 
-Official **`@modelcontextprotocol/server-github`** does not ship a “list my repos with `permissions.push`” tool. **`search_repositories`** can approximate discovery (e.g. `user:yourname`) but **push** filtering may still require **`GET /user/repos`** (REST) or **`gh`**. Execution steps (branch, file, PR) **should** use MCP when those tools are available.
+**`search_repositories`** does not return **`permissions.push`** per row. The numbered table must **say so**. If the user **explicitly** wants push-verified rows **in addition to** the MCP list, the agent may run **`gh api user/repos`** or REST and annotate — but **not** **instead of** MCP **`search_repositories`** when the playbook requires MCP discovery and tools exist.
 
 ### GitHub CLI (`gh`) missing in the agent shell
 
@@ -96,7 +105,7 @@ Official **`@modelcontextprotocol/server-github`** does not ship a “list my re
 4. **Command Palette → Developer: Reload Window** if tools still do not show for the agent.
 5. **Send a new message** to the agent (or continue the thread after reload) so it can use GitHub tools on that run.
 
-**For agents:** Prefer MCP once tools are available; if the user says the server was disabled, point them here and continue with **`gh`** / REST / **`discovery-output.json`** until they enable it — do not block the playbook on UI toggles.
+**For agents:** For **GitHub MCP gate** playbooks, if the server was disabled or tools are missing, point them here and **stop** until they enable and reload (or **explicitly** opt out). For other playbooks, you may continue with **`gh`** / REST after giving these steps.
 
 ## GitHub MCP missing in Cursor
 
@@ -111,4 +120,4 @@ Official **`@modelcontextprotocol/server-github`** does not ship a “list my re
 3. Confirm **`.cursor/mcp.json`** contains **`mcpServers.github`**; if not, from repo root run **`python3 orgwave/scripts/build-mcp-json.py`** and reload again.
 4. Ensure a PAT reaches GitHub MCP: **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, repo **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`gh auth login`** (see **`mcp-servers/README.md`** and **`orgwave/scripts/github-mcp-launch.mjs`**).
 
-After that, **github** should appear alongside any **user-level** MCP servers. If **github** is listed but **disabled**, use **Enabling a disabled MCP server** above. Until the server is available, OrgWave correctly falls back to **`gh`** or the GitHub REST API.
+After that, **github** should appear alongside any **user-level** MCP servers. If **github** is listed but **disabled**, use **Enabling a disabled MCP server** above. For **GitHub MCP gate** playbooks, **do not** fall back to **`gh`** for listing/PR until the user opts out — use the **GitHub MCP gate** checklist instead.
