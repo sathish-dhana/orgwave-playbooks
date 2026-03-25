@@ -25,7 +25,7 @@ Use **MCP** when available (see `mcp-servers/servers/` + `orgwave/required-mcp.m
 ## 4. Execution (per selected repo)
 
 1. Local workspace path or clone; verify `git` remote.
-2. Branch: `techtask/<playbook-id>-<short-slug>` from default branch.
+2. Branch: `techtask/<playbook-id>-<short-slug>` from the repo **`default_branch`** (API / `gh repo view`). If branch or file ops **404**, retry ref **`master`** then **`main`**.
 3. Apply changes; run tests/build as appropriate.
 4. Conventional commit, push, **one PR** per repo.
 

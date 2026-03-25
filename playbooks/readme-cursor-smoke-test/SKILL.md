@@ -30,8 +30,8 @@ description: Test playbook — GitHub MCP (or gh), list repos you can push to, s
 
 Per **selected** repo (clone into workspace or temp path; respect user preference):
 
-1. Default branch: use repo’s default (from API / `gh repo view`).
-2. Branch name: **`techtask/readme-cursor-smoke-test`** (from latest default).
+1. Default branch: use **`default_branch`** from **`GET /repos/{owner}/{repo}`** or **`gh repo view --json defaultBranchName`** (discovery tables can be wrong). If **`get_file_contents`**, **`create_branch`**, or PR **base** returns **404** / MCP **Not Found**, retry the same operation using ref **`master`**, then **`main`**, until one succeeds.
+2. Branch name: **`techtask/readme-cursor-smoke-test`** from the resolved default (same ref for **`from_branch`** and PR **`base`**).
 3. **`README.md`:**
    - If it exists: ensure file ends with a newline, then append exactly: **`Updated by Cursor.`** on a new final line (no duplicate if that exact line already exists as the last line — skip or warn).
    - If it does not exist: create **`README.md`** with a one-line title (e.g. `# <repo name>`) and then **`Updated by Cursor.`** on the last line.

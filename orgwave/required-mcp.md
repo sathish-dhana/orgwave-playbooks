@@ -26,7 +26,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 
 | Step | Why |
 |------|-----|
-| **Secrets** | **GitHub:** repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`~/.cursor/github-mcp.env`** / **`~/.config/orgwave/github-mcp.env`** (same vars) when Cursor was not started from a shell, or **`export`** in **`~/.zshrc`** (the launcher **sources** **`~/.zshrc`** when those vars are still unset — see **`mcp-servers/README.md`**), or **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, or **`gh auth login`** — **`orgwave/scripts/github-mcp-launch.mjs`** maps these to the PAT the MCP server needs. Deeplinks cannot inject tokens. |
+| **Secrets** | **GitHub:** **`github-mcp-launch.mjs`** sets the PAT: **`GITHUB_PERSONAL_ACCESS_TOKEN`** from **`.env`** wins if set; otherwise (by default) **`gh auth token`** before **`GITHUB_TOKEN`** / **`GH_TOKEN`** so MCP matches terminal **`gh`**. **`github-mcp.env`** and **`.zshrc`** merge into **empty** keys only. **`ORGWAVE_MCP_PREFER_ENV_TOKEN=1`** forces env tokens before **`gh`**. See **`mcp-servers/README.md`**. Deeplinks cannot inject tokens. |
 | **Pinned GitHub MCP** | Once per clone: **`cd orgwave/mcp-runtime && npm ci`** so the launcher spawns the pinned server with **`node`** (fast). Without it, **`npx`** cold starts may be slow enough that Cursor shows **empty offerings** / **Client closed** until retry. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
 | **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |

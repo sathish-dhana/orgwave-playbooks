@@ -46,6 +46,7 @@ DEEPLINK_PROMPT_TEMPLATE = (
     "Prefer GitHub MCP when the github server is enabled in Tools and MCP for file branch and PR steps. "
     "Use gh api or GitHub REST with GITHUB_TOKEN for push-filtered repo discovery. "
     "If GitHub MCP auth fails see mcp-servers README for PAT env file options. "
+    "Resolve default branch from repos API. If get_file_contents create_branch or PR base returns Not Found try branch master then main. "
     "Discover repos, numbered table, stop for my selection, one PR per repo, do not merge."
 )
 

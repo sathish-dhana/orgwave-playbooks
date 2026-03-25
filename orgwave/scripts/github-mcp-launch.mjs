@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Launch @modelcontextprotocol/server-github with a PAT (same resolution as the old shell wrapper).
+ * Launch @modelcontextprotocol/server-github with a PAT.
  * - Local runtime: dynamic import so MCP uses this process stdin/stdout directly (no wrapper child).
  * - `gh auth token` uses execFileSync with stdin ignored so JSON-RPC on fd 0 is never consumed.
+ * - Default: after merge, prefer `gh auth token` over GITHUB_TOKEN/GH_TOKEN so MCP matches terminal `gh`.
  */
 import { spawn, execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -23,8 +24,9 @@ const GITHUB_TOKEN_KEYS = [
   "GH_TOKEN",
 ];
 
-function hasAnyGithubPatHint() {
-  return GITHUB_TOKEN_KEYS.some((k) => process.env[k]?.trim());
+/** True when user explicitly wants GITHUB_TOKEN / GH_TOKEN to win over `gh auth token`. */
+function preferEnvTokenOverGh() {
+  return process.env.ORGWAVE_MCP_PREFER_ENV_TOKEN === "1";
 }
 
 /** POSIX single-quoted shell word for an arbitrary string. */
@@ -33,12 +35,10 @@ function shSingleQuote(s) {
 }
 
 /**
- * Cursor started from Dock / deeplinks often inherits no shell profile. If the user exports
- * GITHUB_TOKEN only in ~/.zshrc, source that file (non-interactive; stderr/stdout noise ignored)
- * and copy token vars into this process before falling back to `gh auth token`.
+ * Cursor started from Dock / deeplinks often inherits no shell profile. Source ~/.zshrc
+ * non-interactively and copy PAT-related vars into this process only for keys still empty.
  */
 function loadGithubTokensFromZshrc() {
-  if (hasAnyGithubPatHint()) return;
   if (process.platform === "win32") return;
   const home = process.env.HOME;
   if (!home) return;
@@ -80,6 +80,25 @@ function loadGithubTokensFromZshrc() {
   }
 }
 
+/** @returns {string|null} */
+function tryGhAuthToken() {
+  const ghBins = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh", "gh"];
+  const ghEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0" };
+  for (const gh of ghBins) {
+    try {
+      const t = execFileSync(gh, ["auth", "token"], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        env: ghEnv,
+      }).trim();
+      if (t) return t;
+    } catch {
+      /* try next */
+    }
+  }
+  return null;
+}
+
 /** Cursor opened from Dock / GitHub “Run in Cursor” often has a minimal PATH — gh lives in Homebrew. */
 function ensureMcpPath() {
   const extra = ["/opt/homebrew/bin", "/usr/local/bin"].filter((d) => {
@@ -101,10 +120,12 @@ function ensureMcpPath() {
  * Deeplinks cannot inject secrets. When Cursor’s process has no GITHUB_TOKEN, load optional user file
  * (one-time setup) so GitHub MCP still authenticates after “Run in Cursor” from GitHub.
  */
+/**
+ * Merge ~/.cursor/github-mcp.env (and orgwave path) into env for keys that are still empty.
+ * Cursor may inject empty or stale GITHUB_TOKEN via mcp.json — we still want the user file to
+ * fill missing values. Non-empty vars are not overwritten.
+ */
 function loadUserGithubMcpEnvFile() {
-  if (hasAnyGithubPatHint()) {
-    return;
-  }
   const home = process.env.HOME || process.env.USERPROFILE;
   if (!home) return;
   const candidates = [
@@ -122,7 +143,7 @@ function loadUserGithubMcpEnvFile() {
       const line = raw.replace(/^\uFEFF/, "").trim();
       if (!line || line.startsWith("#")) continue;
       const m = line.match(
-        /^(?:export\s+)?(GITHUB_PERSONAL_ACCESS_TOKEN|GITHUB_TOKEN|GH_TOKEN)\s*=\s*(.*)$/
+        /^(?:export\s+)?(GITHUB_PERSONAL_ACCESS_TOKEN|GITHUB_TOKEN|GH_TOKEN|ORGWAVE_MCP_PREFER_ENV_TOKEN)\s*=\s*(.*)$/
       );
       if (!m) continue;
       let val = m[2].trim();
@@ -135,14 +156,39 @@ function loadUserGithubMcpEnvFile() {
       const key = m[1];
       if (!process.env[key]?.trim()) process.env[key] = val;
     }
-    if (hasAnyGithubPatHint()) {
-      break;
-    }
   }
 }
 
+/**
+ * Maps env → GITHUB_PERSONAL_ACCESS_TOKEN for @modelcontextprotocol/server-github.
+ *
+ * Order (default): explicit PAT name first, then **`gh auth token`** (matches terminal `gh`), then
+ * **GITHUB_TOKEN** / **GH_TOKEN**. Stale or empty tokens from Cursor's mcp.json often broke private-repo
+ * MCP calls while `gh` worked — preferring gh fixes that. Set **ORGWAVE_MCP_PREFER_ENV_TOKEN=1** to use
+ * env tokens before gh (e.g. automation PAT while `gh` is a different user).
+ */
 function resolvePat() {
   if (process.env.GITHUB_PERSONAL_ACCESS_TOKEN?.trim()) return;
+
+  if (preferEnvTokenOverGh()) {
+    if (process.env.GITHUB_TOKEN?.trim()) {
+      process.env.GITHUB_PERSONAL_ACCESS_TOKEN = process.env.GITHUB_TOKEN.trim();
+      return;
+    }
+    if (process.env.GH_TOKEN?.trim()) {
+      process.env.GITHUB_PERSONAL_ACCESS_TOKEN = process.env.GH_TOKEN.trim();
+      return;
+    }
+  }
+
+  if (!preferEnvTokenOverGh()) {
+    const fromGh = tryGhAuthToken();
+    if (fromGh) {
+      process.env.GITHUB_PERSONAL_ACCESS_TOKEN = fromGh;
+      return;
+    }
+  }
+
   if (process.env.GITHUB_TOKEN?.trim()) {
     process.env.GITHUB_PERSONAL_ACCESS_TOKEN = process.env.GITHUB_TOKEN.trim();
     return;
@@ -151,22 +197,10 @@ function resolvePat() {
     process.env.GITHUB_PERSONAL_ACCESS_TOKEN = process.env.GH_TOKEN.trim();
     return;
   }
-  const ghBins = ["/opt/homebrew/bin/gh", "/usr/local/bin/gh", "gh"];
-  const ghEnv = { ...process.env, GIT_TERMINAL_PROMPT: "0" };
-  for (const gh of ghBins) {
-    try {
-      const t = execFileSync(gh, ["auth", "token"], {
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "pipe"],
-        env: ghEnv,
-      }).trim();
-      if (t) {
-        process.env.GITHUB_PERSONAL_ACCESS_TOKEN = t;
-        return;
-      }
-    } catch {
-      /* try next */
-    }
+
+  if (preferEnvTokenOverGh()) {
+    const fromGh = tryGhAuthToken();
+    if (fromGh) process.env.GITHUB_PERSONAL_ACCESS_TOKEN = fromGh;
   }
 }
 

@@ -25,6 +25,7 @@ description: Sample OrgWave playbook — discover via GitHub MCP, select repos, 
 
 Per selected repo: prefer a local clone in the workspace; else clone with user approval.
 
+- Resolve **default branch** from the repos API or `gh repo view`. If the first ref **404**s, try **`master`** then **`main`**.
 - Branch: `techtask/example-migration-poc`
 - Add or update **`ORGWAVE_PLAYBOOK.md`** at repo root: `Playbook: example-migration (POC)`
 - Commit: `chore: add OrgWave playbook marker (POC)`; push; open PR.

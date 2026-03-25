@@ -6,16 +6,23 @@
 
 ## GitHub token (MCP vs `gh`)
 
-The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`node`** in **`.cursor/mcp.json`**), which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github` in this order:
+The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`node`** in **`.cursor/mcp.json`**), which sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for `@modelcontextprotocol/server-github`.
 
-1. Already set (e.g. repo-root **`.env`** via **`envFile`** — copy **`.env.example`**).
-2. **User env file** (only if no token yet): **`~/.cursor/github-mcp.env`** or **`~/.config/orgwave/github-mcp.env`** — one line per variable, e.g. `GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...` or `GITHUB_TOKEN=...`. Use this when you open Cursor from the **Dock** or the GitHub **Run in Cursor** link (those paths do not load **`~/.zshrc`** into Cursor’s process).
-3. **`~/.zshrc`** (macOS/Linux only, only if still no token): the launcher runs **`zsh`** and **sources** **`~/.zshrc`** non-interactively, then copies **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`GITHUB_TOKEN`**, and **`GH_TOKEN`** into the MCP process if they were set there. Keep **`export GITHUB_TOKEN=...`** (or PAT) in **`.zshrc`** so Dock-launched Cursor still gets a token. If **`.zshrc`** prints to stdout (e.g. `echo`), JSON parsing can fail — avoid noisy output on non-interactive source.
-4. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
-5. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
-6. **`gh auth token`** if `gh` is installed and logged in. The launcher **prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so `gh` is found even when the MCP child’s **`PATH`** is minimal.
+### Merge phase (before choosing a PAT)
 
-So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, **`~/.cursor/github-mcp.env`**, **`export`** in **`~/.zshrc`** (now picked up by the launcher), export **`GITHUB_TOKEN`** / **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+Cursor passes **`envFile`** (repo **`.env`**) and **`env`** from **`servers/github.json`** (e.g. **`${env:GITHUB_TOKEN}`**) into the MCP process first. The launcher then:
+
+1. **Prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so **`gh`** is found.
+2. **Reads** **`~/.cursor/github-mcp.env`** and **`~/.config/orgwave/github-mcp.env`** and sets **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`GITHUB_TOKEN`**, **`GH_TOKEN`**, and **`ORGWAVE_MCP_PREFER_ENV_TOKEN`** only for keys that are **still empty** — so a blank **`GITHUB_TOKEN`** from Cursor does not skip these files anymore.
+3. **Sources** **`~/.zshrc`** (macOS/Linux, non-interactive) and copies the same three token vars only where **still empty**. Avoid noisy **`echo`** on non-interactive source (can break the probe). **`export GITHUB_TOKEN=...`** in **`.zshrc`** still helps when nothing else set a value.
+
+### Which credential wins
+
+1. **`GITHUB_PERSONAL_ACCESS_TOKEN`** if non-empty after the merge phase (repo **`.env`** is the usual place — copy **`.env.example`**). This always wins.
+2. **Default:** **`gh auth token`** next (same identity as **`gh`** in the terminal), then **`GITHUB_TOKEN`**, then **`GH_TOKEN`**. That fixes the common case where **`gh`** works but MCP saw a **stale or empty** token from Cursor’s environment and private repos returned **404** / **Not Found**.
+3. **Override:** set **`ORGWAVE_MCP_PREFER_ENV_TOKEN=1`** in **`.env`** or **`github-mcp.env`** to use **`GITHUB_TOKEN`** / **`GH_TOKEN`** **before** **`gh`** (e.g. automation PAT while **`gh`** is another user).
+
+So **“`gh` works but GitHub MCP fails”** is often **wrong token order** or **no token in the MCP child** — use **`.env`** **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`github-mcp.env`**, rely on the default **`gh`-first** behavior after reload, or set **`ORGWAVE_MCP_PREFER_ENV_TOKEN`** when you need env-first.
 
 ### “Authentication Failed” vs “no permission”
 
