@@ -1,5 +1,13 @@
 {
   "mcpServers": {
+    "confluence": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/orgwave/mcp-confluence-runtime/node_modules/@answerai/confluence-mcp/build/index.js"
+      ],
+      "envFile": "${workspaceFolder}/.env"
+    },
     "github": {
       "type": "stdio",
       "command": "node",

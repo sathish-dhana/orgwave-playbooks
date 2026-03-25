@@ -52,6 +52,10 @@ When **`.env`**, **`github-mcp.env`**, **`~/.zshrc`**, or the launcher’s defau
 
 Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, and document the **`id`** in playbook **`SKILL.md`** if a playbook **requires** it.
 
+| Server | Definition | Purpose |
+|--------|------------|---------|
+| **Confluence** | `mcp-servers/servers/confluence.json` | Confluence pages via **`@answerai/confluence-mcp`**; run **`cd orgwave/mcp-confluence-runtime && npm ci`** once. Env: **`CONFLUENCE_BASE_URL`**, **`CONFLUENCE_USER_EMAIL`**, **`CONFLUENCE_API_TOKEN`** in **`.env`**. |
+
 ## Rules for playbooks
 
 - Do **not** embed raw MCP server launch commands in playbooks; add **`mcp-servers/servers/<id>.json`** and merge.

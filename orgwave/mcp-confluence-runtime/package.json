@@ -1,0 +1,8 @@
+{
+  "name": "orgwave-mcp-confluence-runtime",
+  "private": true,
+  "description": "Pinned @answerai/confluence-mcp for Cursor MCP (stable path + faster than cold npx).",
+  "dependencies": {
+    "@answerai/confluence-mcp": "1.0.0"
+  }
+}

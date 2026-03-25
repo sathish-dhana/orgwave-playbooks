@@ -1,0 +1,19 @@
+{
+  "type": "stdio",
+  "command": "node",
+  "args": [
+    "${workspaceFolder}/orgwave/mcp-confluence-runtime/node_modules/@answerai/confluence-mcp/build/index.js"
+  ],
+  "envFile": "${workspaceFolder}/.env",
+  "_orgwave": {
+    "title": "Confluence",
+    "purpose": "Create and update Confluence pages (e.g. playbook confluence-service-doc).",
+    "env": [
+      "CONFLUENCE_BASE_URL — Cloud: https://<site>.atlassian.net/wiki ; Server/Data Center: your Confluence base including /wiki if applicable.",
+      "CONFLUENCE_USER_EMAIL — Atlassian account email (API token is tied to this user).",
+      "CONFLUENCE_API_TOKEN — Atlassian API token (https://id.atlassian.com/manage-profile/security/api-tokens).",
+      "Set all three in repo-root `.env` (envFile). Same file as GitHub PAT is fine."
+    ],
+    "permissionsAllowlistHint": "confluence:*"
+  }
+}

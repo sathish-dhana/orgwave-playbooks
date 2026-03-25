@@ -1,9 +1,9 @@
 # id = folder under playbooks/ — add a row and matching playbooks/<id>/SKILL.md (this file lives in orgwave/)
 
 playbooks:
-  - id: example-migration
-    name: Example migration (POC)
-    description: Sample flow — marker file + PR; copy _template for real migrations.
   - id: readme-cursor-smoke-test
     name: README Cursor smoke test
     description: Test flow — GitHub MCP only for discovery, README change, push, and PRs; pick targets, one PR per repo.
+  - id: confluence-service-doc
+    name: Confluence service stub
+    description: User gives a service name; Confluence MCP creates a minimal page (Java + Spring Boot versions only).

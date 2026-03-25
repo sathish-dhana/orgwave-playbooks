@@ -45,6 +45,26 @@ cd orgwave/mcp-runtime && npm ci
 
 Commit **`package-lock.json`** is already in the repo; **`node_modules/`** is gitignored. If you skip this step, the script still falls back to **`npx`**.
 
+## Confluence (`confluence` server)
+
+The **`confluence`** entry uses a **pinned** copy of [**`@answerai/confluence-mcp`**](https://www.npmjs.com/package/@answerai/confluence-mcp) under **`orgwave/mcp-confluence-runtime/`** (same idea as GitHub under **`orgwave/mcp-runtime/`**).
+
+**One-time** (from repo root):
+
+```bash
+cd orgwave/mcp-confluence-runtime && npm ci
+```
+
+**Secrets** (repo **`.env`**, loaded via **`envFile`** in **`servers/confluence.json`** — never commit values):
+
+| Variable | Role |
+|----------|------|
+| **`CONFLUENCE_BASE_URL`** | Cloud: `https://<site>.atlassian.net/wiki`. Server/DC: your site base (include **`/wiki`** if your install uses it). |
+| **`CONFLUENCE_USER_EMAIL`** | Atlassian account email for the API token. |
+| **`CONFLUENCE_API_TOKEN`** | Create at [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens). |
+
+Copy **[`.env.example`](../.env.example)** placeholders, reload Cursor, enable **`confluence`** under **Tools & MCP**.
+
 ### Recommended: `GITHUB_TOKEN` + `~/.zshrc`
 
 1. Put the token in **`~/.zshrc`** (fix the path — it is **`.zshrc`**, not `.zhrc`):

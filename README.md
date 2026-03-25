@@ -48,11 +48,13 @@ echo 'export GITHUB_TOKEN="ghp_YOUR_TOKEN_HERE"' >> ~/.zshrc
 
 **Optional — repo `.env` instead** (e.g. you always open Cursor from the Dock): copy **[`.env.example`](.env.example)** to **`.env`** at the repo root and set **`GITHUB_PERSONAL_ACCESS_TOKEN`**.
 
+**Confluence MCP** (optional, for **`confluence-service-doc`**): one-time **`cd orgwave/mcp-confluence-runtime && npm ci`**, then set **`CONFLUENCE_BASE_URL`**, **`CONFLUENCE_USER_EMAIL`**, and **`CONFLUENCE_API_TOKEN`** in **`.env`** (see **`.env.example`**). Enable **`confluence`** under **Tools & MCP**.
+
 More detail: **[mcp-servers/README.md](mcp-servers/README.md)** · **`orgwave/required-mcp.md`**.
 
 ## How to run
 
-**Workspace root:** Use **File → Open Folder** on the **`orgwave-playbooks`** directory itself. If you open a parent folder (e.g. a folder that contains many projects), Cursor will **not** load this repo’s **`.cursor/mcp.json`**, so **GitHub MCP** will not appear under **Tools & MCP**—see **[orgwave/required-mcp.md](orgwave/required-mcp.md)** (*GitHub MCP missing in Cursor*).
+**Workspace root:** Use **File → Open Folder** on the **`orgwave-playbooks`** directory itself. If you open a parent folder (e.g. a folder that contains many projects), Cursor will **not** load this repo’s **`.cursor/mcp.json`**, so **GitHub** / **Confluence** MCP entries will not appear under **Tools & MCP**—see **[orgwave/required-mcp.md](orgwave/required-mcp.md)** (*GitHub MCP missing in Cursor*).
 
 | Path | When to use |
 |------|-------------|
