@@ -4,6 +4,8 @@ playbooks:
   - id: readme-cursor-smoke-test
     name: README Cursor smoke test
     description: Test flow — GitHub MCP only for discovery, README change, push, and PRs; pick targets, one PR per repo.
+    mcp_install: github
   - id: confluence-service-doc
     name: Confluence service stub
     description: User gives a service name; Confluence MCP creates a minimal page (Java + Spring Boot versions only).
+    mcp_install: confluence

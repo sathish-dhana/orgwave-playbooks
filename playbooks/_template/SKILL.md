@@ -9,7 +9,7 @@ description: Template — copy folder to playbooks/<new-id>/ and register in org
 
 Customize this section per playbook. The agent must satisfy it **before** discovery or edits.
 
-- **MCP servers required:** List Cursor MCP server **ids** exactly as in `.cursor/mcp.json` → `mcpServers.<id>` (e.g. **`github`**). Add optional servers the same way (e.g. **`user-new-relic`**).
+- **MCP servers required:** List Cursor MCP server **ids** exactly as in `.cursor/mcp.json` → `mcpServers.<id>` (e.g. **`github`**). Add optional servers the same way (e.g. **`user-new-relic`**). In **`orgwave/catalog.yaml`**, set **`mcp_install:`** to the same id(s) (comma-separated) so the generated **`README.md`** gets a blue **Add to Cursor** button ([Cursor MCP install links](https://cursor.com/docs/context/mcp/install-links)).
 - **Hard stop:** If a required **`id`** is **missing** from **`.cursor/mcp.json`**, **stop** — add **`mcp-servers/servers/<id>.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`**, reload, enable the server (**`orgwave/required-mcp.md`**).
 - **Hard stop:** If a required server is **disabled** or its tools **do not attach** to the session, **stop** with enable + reload steps — **do not** substitute shell or REST for that server’s work.
 - **Hard stop:** **401** / **403** from that server after one retry → **stop** with PAT / env guidance (**`mcp-servers/README.md`**, **`orgwave/required-mcp.md`**).

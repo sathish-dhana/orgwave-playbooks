@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""Cursor prompt deeplinks for OrgWave — https://cursor.com/docs/reference/deeplinks (confirm to run)."""
+"""Cursor deeplinks for OrgWave — prompts + MCP install (see Cursor docs links in module)."""
 from __future__ import annotations
 
 import argparse
 import base64
+import json
 import re
 import urllib.parse
 from pathlib import Path
 
 MAX_LEN = 8000
+# MCP install links embed base64(config); stay below typical URL limits.
+MCP_INSTALL_MAX_LEN = 48_000
 _ORGWAVE_DIR = Path(__file__).resolve().parent.parent  # orgwave/
 REPO_ROOT = _ORGWAVE_DIR.parent
 CATALOG = _ORGWAVE_DIR / "catalog.yaml"
 RUN_MD = _ORGWAVE_DIR / "docs" / "run-in-cursor.md"
 PLAYBOOKS_DIR = REPO_ROOT / "playbooks"
+MCP_SERVERS_DIR = REPO_ROOT / "mcp-servers" / "servers"
 # First line marker so we only overwrite/delete our own READMEs under playbooks/<id>/
 README_MARKER = "<!-- orgwave-generated -->"
 
@@ -34,6 +38,78 @@ def _shields_run_badge_url() -> str:
 
 
 RUN_BUTTON_BADGE_IMAGE = _shields_run_badge_url()
+
+# Blue shields badge for “Add to Cursor” (cursor://…/mcp/install — Cursor opens Install MCP Server dialog).
+_MCP_ADD_BADGE_COLOR = "2563eb"
+
+
+def load_mcp_server_install_body(server_id: str) -> dict:
+    """Cursor MCP install `config` is the same JSON object as under mcpServers.<id> (no _orgwave)."""
+    path = MCP_SERVERS_DIR / f"{server_id}.json"
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Missing mcp-servers/servers/{server_id}.json — add it or fix catalog mcp_install."
+        )
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError(f"{path}: root must be a JSON object")
+    return {k: v for k, v in raw.items() if k != "_orgwave"}
+
+
+def mcp_server_display_title(server_id: str) -> str:
+    path = MCP_SERVERS_DIR / f"{server_id}.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    ow = raw.get("_orgwave")
+    if isinstance(ow, dict) and isinstance(ow.get("title"), str) and ow["title"].strip():
+        return ow["title"].strip()
+    return server_id
+
+
+def mcp_install_cursor_url(server_id: str) -> str:
+    """cursor://…/mcp/install — https://cursor.com/docs/context/mcp/install-links"""
+    body = load_mcp_server_install_body(server_id)
+    if not body:
+        raise ValueError(f"MCP server {server_id!r} has no Cursor fields (only _orgwave?)")
+    payload = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
+    config_b64 = base64.standard_b64encode(payload.encode("utf-8")).decode("ascii")
+    q = urllib.parse.urlencode({"name": server_id, "config": config_b64})
+    url = f"cursor://anysphere.cursor-deeplink/mcp/install?{q}"
+    if len(url) > MCP_INSTALL_MAX_LEN:
+        raise ValueError(
+            f"MCP install URL length {len(url)} exceeds {MCP_INSTALL_MAX_LEN} for server {server_id!r}"
+        )
+    return url
+
+
+def mcp_add_to_cursor_badge_markdown(server_id: str, *, disambiguate: bool) -> str:
+    """Same URL as an external ‘Add to Cursor’ page: cursor://…/mcp/install (Cursor MCP install dialog)."""
+    title = mcp_server_display_title(server_id)
+    if disambiguate:
+        label = f"Add_to_Cursor_-_{title.replace(' ', '_')}"
+        alt = f"Add to Cursor — {title} MCP"
+    else:
+        label = "Add_to_Cursor"
+        alt = "Add to Cursor"
+    img = f"https://img.shields.io/badge/-{label}-{_MCP_ADD_BADGE_COLOR}?style=for-the-badge"
+    return f"[![{alt}]({img})]({mcp_install_cursor_url(server_id)})"
+
+
+def mcp_install_badges_row(server_ids: list[str]) -> str:
+    if not server_ids:
+        return ""
+    multi = len(server_ids) > 1
+    return " ".join(
+        mcp_add_to_cursor_badge_markdown(sid, disambiguate=multi) for sid in server_ids
+    )
+
+
+def validate_mcp_install_ids(all_ids: list[str]) -> None:
+    seen = set()
+    for sid in all_ids:
+        if sid in seen:
+            continue
+        seen.add(sid)
+        load_mcp_server_install_body(sid)
 
 # Short plain-text only. No backticks, semicolons in the body, or markdown — Cursor has known deeplink
 # parsing bugs (invalid text for prompt) with some characters and with + vs space encoding; see forum
@@ -84,11 +160,11 @@ def desktop_url(playbook_id: str) -> str:
     return url
 
 
-def parse_catalog(path: Path) -> list[tuple[str, str | None]]:
-    """Return [(id, name), ...] from catalog.yaml (no PyYAML dependency)."""
+def parse_catalog(path: Path) -> list[tuple[str, str | None, list[str]]]:
+    """Return [(id, name, mcp_install_ids), ...] from catalog.yaml (no PyYAML dependency)."""
     text = path.read_text(encoding="utf-8")
     chunks = re.split(r"(?m)^\s*-\s+id:\s*", text)
-    out: list[tuple[str, str | None]] = []
+    out: list[tuple[str, str | None, list[str]]] = []
     for chunk in chunks[1:]:
         first, _, rest = chunk.partition("\n")
         pid = first.strip().strip("\"'")
@@ -96,22 +172,35 @@ def parse_catalog(path: Path) -> list[tuple[str, str | None]]:
             continue
         nm = re.search(r"(?m)^\s+name:\s*(.+)$", chunk)
         name = nm.group(1).strip().strip("\"'") if nm else None
-        out.append((pid, name))
+        mcp_ids: list[str] = []
+        mm = re.search(r"(?m)^\s*mcp_install:\s*(.+)$", chunk)
+        if mm:
+            raw_m = mm.group(1).strip()
+            raw_m = raw_m.split("#")[0].strip()
+            for part in raw_m.split(","):
+                sid = part.strip().strip("\"'")
+                if sid:
+                    mcp_ids.append(sid)
+        out.append((pid, name, mcp_ids))
     return out
 
 
-def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
+def markdown_buttons(entries: list[tuple[str, str | None, list[str]]]) -> str:
     lines = [
         "# Run in Cursor",
         "",
         "One click opens Cursor with a **prefilled prompt** for that playbook (you still confirm before it runs).",
+        "Blue **Add to Cursor** opens the **[MCP install dialog](https://cursor.com/docs/context/mcp/install-links)** with this repo’s server definition (same as a setup page that prefills name, command, and env). **Open the `orgwave-playbooks` folder** in Cursor first so `${workspaceFolder}` in `command` / `args` resolves.",
         "",
-        "| Playbook | Run |",
-        "|----------|-----|",
+        "| Playbook | Add to Cursor (MCP) | Run |",
+        "|----------|---------------------|-----|",
     ]
-    for pid, name in entries:
+    for pid, name, mcp_ids in entries:
         label = name or pid
-        lines.append(f"| **{label}** (`{pid}`) | {run_in_cursor_badge(web_url(pid))} |")
+        install_cell = mcp_install_badges_row(mcp_ids) if mcp_ids else "—"
+        lines.append(
+            f"| **{label}** (`{pid}`) | {install_cell} | {run_in_cursor_badge(web_url(pid))} |"
+        )
     lines.extend(
         [
             "",
@@ -178,10 +267,20 @@ def playbook_readme_env_section(playbook_id: str) -> str:
     return ""
 
 
-def playbook_readme_body(playbook_id: str, title: str) -> str:
+def playbook_readme_body(
+    playbook_id: str, title: str, mcp_install_ids: list[str]
+) -> str:
     badge = run_in_cursor_badge(web_url(playbook_id))
     paste_fallback = build_prompt(playbook_id)
     extra = playbook_readme_env_section(playbook_id)
+    install_block: list[str] = []
+    if mcp_install_ids:
+        install_block = [
+            mcp_install_badges_row(mcp_install_ids),
+            "",
+            "**Add to Cursor:** opens Cursor’s [MCP install dialog](https://cursor.com/docs/context/mcp/install-links) with this playbook’s server prefilled (name, command, env — same flow as an external “Add to Cursor” page). Open **`orgwave-playbooks`** as the workspace folder first so paths like `${workspaceFolder}/orgwave/scripts/...` work. Fill secrets in the dialog or use **`.env`** / **`~/.cursor/*-mcp.env`** / **`~/.zshrc`** as in **[mcp-servers/README.md](../../mcp-servers/README.md)**.",
+            "",
+        ]
     return "\n".join(
         [
             README_MARKER,
@@ -189,6 +288,7 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
             "",
             f"Playbook id: `{playbook_id}`",
             "",
+            *install_block,
             badge,
             "",
             "Click the **play** button to open Cursor with this playbook's prompt prefilled - you still confirm before the agent runs.",
@@ -212,17 +312,17 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
     )
 
 
-def write_playbook_readmes(entries: list[tuple[str, str | None]]) -> list[Path]:
+def write_playbook_readmes(entries: list[tuple[str, str | None, list[str]]]) -> list[Path]:
     """Write playbooks/<id>/README.md for each catalog entry when that folder exists."""
-    catalog_ids = {pid for pid, _ in entries}
+    catalog_ids = {pid for pid, _, _ in entries}
     written: list[Path] = []
 
-    for pid, name in entries:
+    for pid, name, mcp_ids in entries:
         folder = PLAYBOOKS_DIR / pid
         if not folder.is_dir():
             continue
         readme = folder / "README.md"
-        readme.write_text(playbook_readme_body(pid, name or pid), encoding="utf-8")
+        readme.write_text(playbook_readme_body(pid, name or pid, mcp_ids), encoding="utf-8")
         written.append(readme)
 
     # Remove stale generated READMEs (playbook removed from catalog)
@@ -246,6 +346,11 @@ def main() -> None:
     p.add_argument("playbook_id", nargs="?", help="Single playbook id (folder under playbooks/)")
     p.add_argument("--desktop", action="store_true", help="Emit cursor:// URL for one id")
     p.add_argument(
+        "--mcp-install",
+        metavar="SERVER_ID",
+        help="Print cursor:// MCP install URL for mcp-servers/servers/<id>.json (see Cursor MCP install links)",
+    )
+    p.add_argument(
         "--write-docs",
         action="store_true",
         help="Write orgwave/docs/run-in-cursor.md and playbooks/<id>/README.md (folder landing + Run badge)",
@@ -257,8 +362,16 @@ def main() -> None:
     )
     args = p.parse_args()
 
+    if args.mcp_install:
+        print(mcp_install_cursor_url(args.mcp_install))
+        return
+
     if args.write_docs or args.print_all:
         entries = parse_catalog(CATALOG)
+        flat_mcp: list[str] = []
+        for _pid, _n, ids in entries:
+            flat_mcp.extend(ids)
+        validate_mcp_install_ids(flat_mcp)
         body = markdown_buttons(entries)
         if args.print_all:
             print(body, end="")
@@ -272,7 +385,7 @@ def main() -> None:
         return
 
     if not args.playbook_id:
-        p.error("pass playbook_id, or use --write-docs / --print-all")
+        p.error("pass playbook_id, or use --write-docs / --print-all / --mcp-install")
     if args.desktop:
         print(desktop_url(args.playbook_id))
     else:

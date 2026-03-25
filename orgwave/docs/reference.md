@@ -3,8 +3,10 @@
 ## Run in Cursor (all playbooks)
 
 - **Source of truth:** `orgwave/catalog.yaml` only. Playbook folders do **not** contain button code.
-- **Generated files:** [run-in-cursor.md](run-in-cursor.md) (all playbooks) and **`playbooks/<id>/README.md`** (per playbook — GitHub renders this under the folder file list so the play badge appears *in* `playbooks/my-playbook/`). Markup lives in `orgwave/scripts/generate-orgwave-deeplink.py` (`RUN_BUTTON_*`, `run_in_cursor_badge()`).
+- **Generated files:** [run-in-cursor.md](run-in-cursor.md) (all playbooks) and **`playbooks/<id>/README.md`** (per playbook — GitHub renders this under the folder file list so the play badge appears *in* `playbooks/my-playbook/`). Markup lives in `orgwave/scripts/generate-orgwave-deeplink.py` (`RUN_BUTTON_*`, `run_in_cursor_badge()`, MCP install helpers).
+- **Optional `mcp_install`:** Comma-separated MCP server ids (`mcp-servers/servers/<id>.json`). Drives blue **Add to Cursor** buttons using [Cursor MCP install deeplinks](https://cursor.com/docs/context/mcp/install-links) (`cursor://anysphere.cursor-deeplink/mcp/install?...`). Keep in sync with **`MCP servers required`** in each playbook’s **`SKILL.md`**.
 - **Regenerate (repo root):** `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs` — commit the updated `orgwave/docs/run-in-cursor.md` and `playbooks/<id>/README.md` files with your changes.
+- **Debug one install URL:** `python3 orgwave/scripts/generate-orgwave-deeplink.py --mcp-install github`
 
 ---
 

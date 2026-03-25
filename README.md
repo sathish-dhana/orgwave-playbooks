@@ -7,15 +7,15 @@ Central **playbook** definitions for org-wide tech changes: discover candidate G
 | What | Where |
 |------|--------|
 | Add or edit a playbook | **`playbooks/<id>/`** — copy from `playbooks/_template`, then edit `SKILL.md` |
-| Register it | Add one row to **`orgwave/catalog.yaml`** (the `id` must match the folder name) |
+| Register it | Add one row to **`orgwave/catalog.yaml`** (the `id` must match the folder name). If **`SKILL.md`** lists required MCP servers, add **`mcp_install: id`** (or `id1, id2`) so the generated **`README.md`** gets a blue **Add to Cursor** button per required server. |
 
 That’s it. You do **not** add the green play button by hand.
 
-**Play button:** After you change the catalog or generator, run from the **repo root**:
+**Play button + MCP install badges:** After you change the catalog or generator, run from the **repo root**:
 
 `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`
 
-That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** (commit those updates with your PR).
+That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** — green **Run** deeplink plus optional blue **Add to Cursor** (MCP install via [Cursor MCP install links](https://cursor.com/docs/context/mcp/install-links), same mechanism as an external setup page). Set optional **`mcp_install:`** in **`orgwave/catalog.yaml`** (comma-separated server ids). Commit generated files with your PR.
 
 **MCP servers:** Top-level **`mcp-servers/`** — see **[mcp-servers/README.md](mcp-servers/README.md)**. After adding or editing **`mcp-servers/servers/*.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
 

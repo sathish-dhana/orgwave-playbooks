@@ -2,6 +2,10 @@
 
 **Cursor only reads** [`.cursor/mcp.json`](../.cursor/mcp.json) at the workspace root ([Cursor MCP docs](https://cursor.com/docs/context/mcp)). This top-level folder is the **source of truth** for MCP: one JSON file per server; a script **merges** them into `.cursor/mcp.json`.
 
+### One-click install (Cursor deeplink)
+
+Cursor can open the **Install MCP Server** dialog from a link ([**MCP install links**](https://cursor.com/docs/context/mcp/install-links)). OrgWave generates those links from each `servers/<id>.json` (without `_orgwave`) for playbooks that list **`mcp_install:`** in **`orgwave/catalog.yaml`** — see generated **`playbooks/<id>/README.md`** (blue **Add to Cursor** button) and **`orgwave/docs/run-in-cursor.md`**. Regenerate with **`python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`**. Print one URL: **`python3 orgwave/scripts/generate-orgwave-deeplink.py --mcp-install <id>`**. Open the **`orgwave-playbooks`** folder in Cursor before installing so **`${workspaceFolder}`** in `args` / `envFile` resolves.
+
 **Repo layout:** update **playbooks** under `playbooks/`; update **MCP servers** here — keep concerns separate.
 
 ## GitHub token (MCP vs `gh`)
