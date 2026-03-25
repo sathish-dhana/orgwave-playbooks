@@ -13,7 +13,7 @@
 - **Policy:** [`../required-mcp.md`](../required-mcp.md).
 - **How to add servers:** [`../../mcp-servers/README.md`](../../mcp-servers/README.md) — one JSON file per server under [`../../mcp-servers/servers/`](../../mcp-servers/servers/).
 - **Merge script:** `python3 orgwave/scripts/build-mcp-json.py` → writes [`.cursor/mcp.json`](../../.cursor/mcp.json) ([Cursor project MCP](https://cursor.com/docs/context/mcp)). **GitHub:** `GITHUB_TOKEN` in **`~/.zshrc`** + launch Cursor from terminal, or optional [`.env`](../../.env.example) — never commit secrets.
-- **Agent behavior:** Prefer MCP when tools work; **never block** — fall back to `gh` / `discovery-output.json` per `required-mcp.md`.
+- **Agent behavior:** If a playbook **requires** an MCP server, use **only** that server’s tools for those steps; if prerequisites fail (**missing `mcp.json` entry**, **disabled**, **no tools in session**, **401/403** after retry), **stop** with `required-mcp.md` — **no** `gh` / REST substitute.
 - **Disabled in UI:** If a server is listed under Tools & MCP but **off**, enable it per [`required-mcp.md` → *Enabling a disabled MCP server*](../required-mcp.md#enabling-a-disabled-mcp-server).
 
 ---
@@ -31,15 +31,15 @@ Place at `playbooks/<id>/discovery.json`. Used by **`orgwave/scripts/discover-re
 
 Omit the file to list all **non-archived** repos for the org (no extra filters).
 
-## Local discovery (optional)
+## Local discovery (optional, human / attachment only)
 
-From the **repository root**, with **`gh`** authenticated (`GH_TOKEN` or `gh auth login`):
+From the **repository root**, with **`gh`** authenticated (for the script only):
 
 ```bash
 ORG=my-org PLAYBOOK_ID=my-playbook ./orgwave/scripts/discover-repos.sh
 ```
 
-Writes **`discovery-output.json`** in the current directory by default (override with **`OUT_JSON`**). Use that file in Cursor as the candidate list, or paste the table into chat.
+Writes **`discovery-output.json`** by default (override with **`OUT_JSON`**). You may attach it for context; playbooks that **require** GitHub MCP still expect in-session **`search_repositories`** (or the agent **stops** at the gate — the script does **not** replace MCP).
 
 ---
 

@@ -134,7 +134,7 @@ Follow [Cursor MCP — Remote Server](https://cursor.com/docs/context/mcp) for O
 ## Behaviour with prompts
 
 - If **`_orgwave.env`** vars are available to Cursor’s MCP process, that server **can** auto-start and tools appear to the agent.
-- If not, OrgWave **does not block** — fall back to `gh`, other MCP servers, or `discovery-output.json` per **`orgwave/required-mcp.md`** and the playbook **`SKILL.md`**.
+- If a playbook **requires** a server and it is missing, disabled, or unauthenticated, the agent **stops** with **`orgwave/required-mcp.md`** — **no** **`gh`** / REST substitute for that server’s steps.
 
 ## Enabling a server that is disabled in Cursor
 
@@ -142,5 +142,5 @@ A server can be **defined** in **`.cursor/mcp.json`** but **turned off** in the 
 
 ## See also
 
-- **`orgwave/required-mcp.md`** — policy (non-blocking, fallbacks).
+- **`orgwave/required-mcp.md`** — policy (MCP gate, reload, PAT).
 - **`orgwave/scripts/build-mcp-json.py`** — merge implementation.

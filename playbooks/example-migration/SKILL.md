@@ -1,15 +1,18 @@
 ---
 name: orgwave-example-migration
-description: Sample OrgWave playbook — discover via GitHub MCP, select repos, add a POC marker file, open PRs.
+description: Sample OrgWave playbook — discover via GitHub MCP, select repos, add a POC marker file, open PRs via MCP only.
 ---
 
 # Example migration (POC)
 
 ## Prerequisites
 
-- **MCP servers required:** **`github`** (recommended for discovery; optional if the user supplies **`discovery-output.json`** or explicitly uses **`gh`** only).
-- **Enabled:** If you use GitHub MCP for discovery, confirm **`github`** is **on** in **Tools & MCP** and GitHub tools are available in this session. If not, **stop** and notify the user per **`orgwave/required-mcp.md`** (enable server, PAT, reload). If **`github`** is missing from **`.cursor/mcp.json`**, instruct **`mcp-servers/servers/github.json`** + **`python3 orgwave/scripts/build-mcp-json.py`**, then reload and enable.
-- **PAT / tokens:** Prefer **`export GITHUB_TOKEN=…`** or **`GITHUB_PERSONAL_ACCESS_TOKEN`** in **`~/.zshrc`**, or **`gh auth login`**, so **`github-mcp-launch.mjs`** can authenticate — see **`mcp-servers/README.md`**.
+- **MCP servers required:** **`github`**. Use **only** GitHub MCP tools for GitHub operations (discovery, branches, files, PRs).
+- **Hard stop — definition:** If **`mcpServers.github`** is **absent** from **`.cursor/mcp.json`**, **stop** and instruct: **`mcp-servers/servers/github.json`**, **`python3 orgwave/scripts/build-mcp-json.py`**, reload, enable **`github`**.
+- **Hard stop — not enabled or tools missing:** If **`github`** is off or tools do not attach, **stop** per **`orgwave/required-mcp.md`**.
+- **Hard stop — auth:** **401** / **403** after one retry → **stop** with **`mcp-servers/README.md`** and **`orgwave/required-mcp.md`** PAT guidance.
+
+When prerequisites pass, **continue**.
 
 ## 1. Intent
 
@@ -23,32 +26,33 @@ description: Sample OrgWave playbook — discover via GitHub MCP, select repos, 
 
 ## 3. Discovery
 
-1. If the user attached **`discovery-output.json`** (e.g. from local `orgwave/scripts/discover-repos.sh`), use it as candidates (respect **Eligibility**); re-query only if asked.
-2. Else list repos (MCP per `mcp-servers/servers/` + `orgwave/required-mcp.md`, or `gh`) for the org.
-3. Numbered table: `#`, name, default branch, `html_url`. **Stop** for selection.
+1. List repos with GitHub MCP **`search_repositories`** (or other GitHub MCP listing tools the server provides), scoped to the org/user the user names. Retry once on transient failure; then **stop** if still failing.
+2. Numbered table: `#`, name, default branch when present, `html_url`. Note **push not verified per row** if using search. **Stop** for selection.
 
 ## 4. Execution
 
-Per selected repo: prefer a local clone in the workspace; else clone with user approval.
+Per selected repo — **GitHub MCP only**:
 
-- Resolve **default branch** from the repos API or `gh repo view`. If the first ref **404**s, try **`master`** then **`main`**.
-- Branch: `techtask/example-migration-poc`
-- Add or update **`ORGWAVE_PLAYBOOK.md`** at repo root: `Playbook: example-migration (POC)`
-- Commit: `chore: add OrgWave playbook marker (POC)`; push; open PR.
+- Resolve **default branch** from MCP metadata; on **404**, try **`master`** then **`main`**.
+- Branch: **`techtask/example-migration-poc`**
+- Add or update **`ORGWAVE_PLAYBOOK.md`** at repo root: `Playbook: example-migration (POC)` using MCP branch/file/push tools.
+- Commit message when supported: `chore: add OrgWave playbook marker (POC)`; push via MCP; open PR via MCP.
 
 ## 5. PR
 
+- Use **`create_pull_request`** (retry once; then **stop** if needed).
 - **Title:** `example-migration: OrgWave POC marker`
 - **Body:** Link this playbooks repo; POC only; **do not merge** without review.
 
 ## 6. Checklist
 
-- [ ] User selected these repos explicitly
+- [ ] Prerequisites passed or run **stopped** with gate
+- [ ] User selected repos explicitly
+- [ ] GitHub steps used **only** MCP tools
 - [ ] One PR per service
 - [ ] No merge by agent
 
 ## Automation notes
 
-- **Run in Cursor:** listed in `orgwave/catalog.yaml` only; see [orgwave/docs/run-in-cursor.md](../../orgwave/docs/run-in-cursor.md). Regenerate badges with `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`.
-- **MCP:** shared servers in [mcp-servers/servers/](../../mcp-servers/servers/) — [mcp-servers/README.md](../../mcp-servers/README.md); merge with `python3 orgwave/scripts/build-mcp-json.py`.
-- **Optional local discover:** `discovery.json` + [orgwave/scripts/discover-repos.sh](../../orgwave/scripts/discover-repos.sh) — see [orgwave/docs/reference.md](../../orgwave/docs/reference.md).
+- **Run in Cursor:** `orgwave/catalog.yaml`; regenerate with `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`.
+- **MCP:** [mcp-servers/servers/](../../mcp-servers/servers/) — [mcp-servers/README.md](../../mcp-servers/README.md); **`python3 orgwave/scripts/build-mcp-json.py`**.
