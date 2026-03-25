@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add MCP — Cursor</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; max-width: 42rem; margin: 2.5rem auto; padding: 0 1.25rem; line-height: 1.5; color: #111; }
+    h1 { font-size: 1.25rem; font-weight: 600; }
+    p { margin: 0.75rem 0; color: #444; }
+    .btn { display: inline-block; margin-top: 1rem; padding: 0.65rem 1.25rem; background: #2563eb; color: #fff !important; text-decoration: none; border-radius: 6px; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; font-size: 0.875rem; }
+    .btn:hover { background: #1d4ed8; }
+    code { font-size: 0.8rem; word-break: break-all; background: #f4f4f5; padding: 0.15rem 0.35rem; border-radius: 4px; }
+    .err { color: #b91c1c; }
+  </style>
+</head>
+<body>
+  <h1>Add MCP to Cursor</h1>
+  <p id="msg">Loading…</p>
+  <p id="go" hidden><a id="btn" class="btn" href="#">Add to Cursor</a></p>
+  <p id="detail" hidden style="font-size:0.9rem"><strong>If Cursor does not open:</strong> your browser may block custom protocols until you use the button above, or paste the <code>cursor://…</code> line below into the address bar.</p>
+  <p id="raw" hidden><code id="rawlink"></code></p>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var name = params.get("name");
+      var config = params.get("config");
+      var msg = document.getElementById("msg");
+      var go = document.getElementById("go");
+      var btn = document.getElementById("btn");
+      if (!name || !config) {
+        msg.textContent = "Missing name or config in the URL. Open this page from the “Add to Cursor” link in a playbook README (same query string as the generator), after GitHub Pages or your HTTPS host is set up.";
+        msg.className = "err";
+        return;
+      }
+      var target = "cursor://anysphere.cursor-deeplink/mcp/install?name=" + encodeURIComponent(name) + "&config=" + encodeURIComponent(config);
+      msg.textContent = "Uses the same install flow as Cursor’s MCP install links: prefilled name, command, and env. Your OS may ask to allow opening Cursor.";
+      btn.setAttribute("href", target);
+      document.getElementById("rawlink").textContent = target;
+      go.removeAttribute("hidden");
+      document.getElementById("detail").removeAttribute("hidden");
+      document.getElementById("raw").removeAttribute("hidden");
+    })();
+  </script>
+</body>
+</html>

@@ -1,4 +1,8 @@
 # id = folder under playbooks/ — add a row and matching playbooks/<id>/SKILL.md (this file lives in orgwave/)
+#
+# For “Add to Cursor” from github.com READMEs: set your GitHub Pages origin (folder /docs), no trailing slash.
+# See docs/README.md. Uncomment and edit when Pages is live:
+# mcp_install_bridge: https://YOUR_ORG.github.io/YOUR_REPO
 
 playbooks:
   - id: readme-cursor-smoke-test

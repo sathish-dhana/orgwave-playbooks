@@ -6,6 +6,8 @@
 
 Cursor can open the **Install MCP Server** dialog from a link ([**MCP install links**](https://cursor.com/docs/context/mcp/install-links)). OrgWave generates those links from each `servers/<id>.json` (without `_orgwave`) for playbooks that list **`mcp_install:`** in **`orgwave/catalog.yaml`** — see generated **`playbooks/<id>/README.md`** (blue **Add to Cursor** button) and **`orgwave/docs/run-in-cursor.md`**. Regenerate with **`python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`**. Print one URL: **`python3 orgwave/scripts/generate-orgwave-deeplink.py --mcp-install <id>`**. Open the **`orgwave-playbooks`** folder in Cursor before installing so **`${workspaceFolder}`** in `args` / `envFile` resolves.
 
+**github.com README:** image badges that point at `cursor://` often **do not open Cursor** (GitHub proxies the shield image through **Camo**). Use **`mcp_install_bridge`** in **`orgwave/catalog.yaml`** with **[GitHub Pages `docs/mcp-install.html`](../docs/mcp-install.html)** so the badge targets **HTTPS**, then click **Add to Cursor** on that page — same as a standalone setup site.
+
 **Repo layout:** update **playbooks** under `playbooks/`; update **MCP servers** here — keep concerns separate.
 
 ## GitHub token (MCP vs `gh`)

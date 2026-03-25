@@ -15,7 +15,7 @@ That’s it. You do **not** add the green play button by hand.
 
 `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`
 
-That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** — green **Run** deeplink plus optional blue **Add to Cursor** (MCP install via [Cursor MCP install links](https://cursor.com/docs/context/mcp/install-links), same mechanism as an external setup page). Set optional **`mcp_install:`** in **`orgwave/catalog.yaml`** (comma-separated server ids). Commit generated files with your PR.
+That refreshes **`playbooks/<id>/README.md`** and **`orgwave/docs/run-in-cursor.md`** — green **Run** deeplink plus optional blue **Add to Cursor** (MCP install via [Cursor MCP install links](https://cursor.com/docs/context/mcp/install-links)). On **github.com**, set **`mcp_install_bridge`** to your **[GitHub Pages](https://docs.github.com/en/pages)** origin (`docs/` hosts **`mcp-install.html`** — see **`docs/README.md`**) so the badge uses **HTTPS** instead of `cursor://` (which often opens only the Camo badge image). Set optional **`mcp_install:`** in **`orgwave/catalog.yaml`**. Commit generated files with your PR.
 
 **MCP servers:** Top-level **`mcp-servers/`** — see **[mcp-servers/README.md](mcp-servers/README.md)**. After adding or editing **`mcp-servers/servers/*.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`** and commit **`.cursor/mcp.json`**.
 
@@ -68,6 +68,8 @@ python3 orgwave/scripts/build-mcp-json.py
 python3 orgwave/scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID
 python3 orgwave/scripts/generate-orgwave-deeplink.py MY_PLAYBOOK_ID --desktop
 python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs
+# optional: test GitHub-safe links without committing catalog yet
+python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs --mcp-bridge https://YOUR_ORG.github.io/YOUR_REPO
 ```
 
 ## Limits (by design)

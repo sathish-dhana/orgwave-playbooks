@@ -65,13 +65,17 @@ def mcp_server_display_title(server_id: str) -> str:
     return server_id
 
 
-def mcp_install_cursor_url(server_id: str) -> str:
-    """cursor://…/mcp/install — https://cursor.com/docs/context/mcp/install-links"""
+def mcp_install_config_b64(server_id: str) -> str:
     body = load_mcp_server_install_body(server_id)
     if not body:
         raise ValueError(f"MCP server {server_id!r} has no Cursor fields (only _orgwave?)")
     payload = json.dumps(body, separators=(",", ":"), ensure_ascii=False)
-    config_b64 = base64.standard_b64encode(payload.encode("utf-8")).decode("ascii")
+    return base64.standard_b64encode(payload.encode("utf-8")).decode("ascii")
+
+
+def mcp_install_cursor_url(server_id: str) -> str:
+    """cursor://…/mcp/install — https://cursor.com/docs/context/mcp/install-links"""
+    config_b64 = mcp_install_config_b64(server_id)
     q = urllib.parse.urlencode({"name": server_id, "config": config_b64})
     url = f"cursor://anysphere.cursor-deeplink/mcp/install?{q}"
     if len(url) > MCP_INSTALL_MAX_LEN:
@@ -81,8 +85,29 @@ def mcp_install_cursor_url(server_id: str) -> str:
     return url
 
 
-def mcp_add_to_cursor_badge_markdown(server_id: str, *, disambiguate: bool) -> str:
-    """Same URL as an external ‘Add to Cursor’ page: cursor://…/mcp/install (Cursor MCP install dialog)."""
+def mcp_install_https_bridge_href(server_id: str, bridge_base: str) -> str:
+    """HTTPS page (e.g. GitHub Pages /docs/mcp-install.html) that links to cursor:// — works from github.com README."""
+    config_b64 = mcp_install_config_b64(server_id)
+    base = bridge_base.rstrip("/")
+    q = urllib.parse.urlencode({"name": server_id, "config": config_b64})
+    url = f"{base}/mcp-install.html?{q}"
+    if len(url) > MCP_INSTALL_MAX_LEN:
+        raise ValueError(
+            f"MCP bridge URL length {len(url)} exceeds {MCP_INSTALL_MAX_LEN} for server {server_id!r}"
+        )
+    return url
+
+
+def mcp_add_to_cursor_href(server_id: str, mcp_bridge: str | None) -> str:
+    if mcp_bridge:
+        return mcp_install_https_bridge_href(server_id, mcp_bridge)
+    return mcp_install_cursor_url(server_id)
+
+
+def mcp_add_to_cursor_badge_markdown(
+    server_id: str, *, disambiguate: bool, mcp_bridge: str | None
+) -> str:
+    """Badge href: HTTPS bridge when mcp_bridge is set (GitHub README); else cursor:// (Cursor preview)."""
     title = mcp_server_display_title(server_id)
     if disambiguate:
         label = f"Add_to_Cursor_-_{title.replace(' ', '_')}"
@@ -91,15 +116,17 @@ def mcp_add_to_cursor_badge_markdown(server_id: str, *, disambiguate: bool) -> s
         label = "Add_to_Cursor"
         alt = "Add to Cursor"
     img = f"https://img.shields.io/badge/-{label}-{_MCP_ADD_BADGE_COLOR}?style=for-the-badge"
-    return f"[![{alt}]({img})]({mcp_install_cursor_url(server_id)})"
+    href = mcp_add_to_cursor_href(server_id, mcp_bridge)
+    return f"[![{alt}]({img})]({href})"
 
 
-def mcp_install_badges_row(server_ids: list[str]) -> str:
+def mcp_install_badges_row(server_ids: list[str], mcp_bridge: str | None) -> str:
     if not server_ids:
         return ""
     multi = len(server_ids) > 1
     return " ".join(
-        mcp_add_to_cursor_badge_markdown(sid, disambiguate=multi) for sid in server_ids
+        mcp_add_to_cursor_badge_markdown(sid, disambiguate=multi, mcp_bridge=mcp_bridge)
+        for sid in server_ids
     )
 
 
@@ -160,9 +187,16 @@ def desktop_url(playbook_id: str) -> str:
     return url
 
 
-def parse_catalog(path: Path) -> list[tuple[str, str | None, list[str]]]:
-    """Return [(id, name, mcp_install_ids), ...] from catalog.yaml (no PyYAML dependency)."""
+def parse_catalog(path: Path) -> tuple[str | None, list[tuple[str, str | None, list[str]]]]:
+    """Return (mcp_install_bridge, [(id, name, mcp_install_ids), ...]) from catalog.yaml (no PyYAML)."""
     text = path.read_text(encoding="utf-8")
+    bridge: str | None = None
+    bm = re.search(r"(?m)^mcp_install_bridge:\s*(.+)$", text)
+    if bm:
+        raw_b = bm.group(1).strip()
+        raw_b = raw_b.split("#")[0].strip().strip("\"'")
+        if raw_b and raw_b.lower() not in ("null", "none", "~", "false"):
+            bridge = raw_b
     chunks = re.split(r"(?m)^\s*-\s+id:\s*", text)
     out: list[tuple[str, str | None, list[str]]] = []
     for chunk in chunks[1:]:
@@ -182,22 +216,36 @@ def parse_catalog(path: Path) -> list[tuple[str, str | None, list[str]]]:
                 if sid:
                     mcp_ids.append(sid)
         out.append((pid, name, mcp_ids))
-    return out
+    return bridge, out
 
 
-def markdown_buttons(entries: list[tuple[str, str | None, list[str]]]) -> str:
+def markdown_buttons(
+    entries: list[tuple[str, str | None, list[str]]], mcp_bridge: str | None
+) -> str:
+    bridge_note = ""
+    if mcp_bridge:
+        bridge_note = (
+            "Blue **Add to Cursor** uses an **HTTPS** helper (GitHub Pages `docs/mcp-install.html`) so the link works from **github.com**. On that page, click **Add to Cursor** to open the install dialog ([MCP install links](https://cursor.com/docs/context/mcp/install-links))."
+        )
+    else:
+        bridge_note = (
+            "**Add to Cursor** targets `cursor://` — that works in the **Cursor** app’s Markdown preview. **On github.com**, image badges are often opened via **Camo** and `cursor://` may not run; set **`mcp_install_bridge`** in **`orgwave/catalog.yaml`** to your **GitHub Pages** origin and regenerate (see **`docs/README.md`**), or use your org’s HTTPS install page the same way."
+        )
     lines = [
         "# Run in Cursor",
         "",
         "One click opens Cursor with a **prefilled prompt** for that playbook (you still confirm before it runs).",
-        "Blue **Add to Cursor** opens the **[MCP install dialog](https://cursor.com/docs/context/mcp/install-links)** with this repo’s server definition (same as a setup page that prefills name, command, and env). **Open the `orgwave-playbooks` folder** in Cursor first so `${workspaceFolder}` in `command` / `args` resolves.",
+        bridge_note,
+        "**Open the `orgwave-playbooks` folder** in Cursor first so `${workspaceFolder}` in `command` / `args` resolves.",
         "",
         "| Playbook | Add to Cursor (MCP) | Run |",
         "|----------|---------------------|-----|",
     ]
     for pid, name, mcp_ids in entries:
         label = name or pid
-        install_cell = mcp_install_badges_row(mcp_ids) if mcp_ids else "—"
+        install_cell = (
+            mcp_install_badges_row(mcp_ids, mcp_bridge) if mcp_ids else "—"
+        )
         lines.append(
             f"| **{label}** (`{pid}`) | {install_cell} | {run_in_cursor_badge(web_url(pid))} |"
         )
@@ -268,7 +316,10 @@ def playbook_readme_env_section(playbook_id: str) -> str:
 
 
 def playbook_readme_body(
-    playbook_id: str, title: str, mcp_install_ids: list[str]
+    playbook_id: str,
+    title: str,
+    mcp_install_ids: list[str],
+    mcp_bridge: str | None,
 ) -> str:
     badge = run_in_cursor_badge(web_url(playbook_id))
     paste_fallback = build_prompt(playbook_id)
@@ -276,11 +327,25 @@ def playbook_readme_body(
     install_block: list[str] = []
     if mcp_install_ids:
         install_block = [
-            mcp_install_badges_row(mcp_install_ids),
-            "",
-            "**Add to Cursor:** opens Cursor’s [MCP install dialog](https://cursor.com/docs/context/mcp/install-links) with this playbook’s server prefilled (name, command, env — same flow as an external “Add to Cursor” page). Open **`orgwave-playbooks`** as the workspace folder first so paths like `${workspaceFolder}/orgwave/scripts/...` work. Fill secrets in the dialog or use **`.env`** / **`~/.cursor/*-mcp.env`** / **`~/.zshrc`** as in **[mcp-servers/README.md](../../mcp-servers/README.md)**.",
+            mcp_install_badges_row(mcp_install_ids, mcp_bridge),
             "",
         ]
+        if not mcp_bridge:
+            install_block.extend(
+                [
+                    "> **On github.com:** the badge may open a **Camo** image URL instead of Cursor — GitHub often does not apply `cursor://` links on image badges. Set **`mcp_install_bridge`** in **`orgwave/catalog.yaml`** (see **`docs/README.md`**) and regenerate, or open this README in **Cursor**.",
+                    "",
+                ]
+            )
+        bridge_hint = (
+            "Opens the **[MCP install](https://cursor.com/docs/context/mcp/install-links)** flow (prefilled name, command, env)."
+            if not mcp_bridge
+            else "Opens an **HTTPS** helper page; click **Add to Cursor** there to launch the install dialog (same as a standalone setup page)."
+        )
+        install_block.append(
+            f"**Add to Cursor:** {bridge_hint} Open **`orgwave-playbooks`** as the workspace folder first so paths like `${{workspaceFolder}}/orgwave/scripts/...` work. Fill secrets in the dialog or use **`.env`** / **`~/.cursor/*-mcp.env`** / **`~/.zshrc`** as in **[mcp-servers/README.md](../../mcp-servers/README.md)**."
+        )
+        install_block.append("")
     return "\n".join(
         [
             README_MARKER,
@@ -312,7 +377,9 @@ def playbook_readme_body(
     )
 
 
-def write_playbook_readmes(entries: list[tuple[str, str | None, list[str]]]) -> list[Path]:
+def write_playbook_readmes(
+    entries: list[tuple[str, str | None, list[str]]], mcp_bridge: str | None
+) -> list[Path]:
     """Write playbooks/<id>/README.md for each catalog entry when that folder exists."""
     catalog_ids = {pid for pid, _, _ in entries}
     written: list[Path] = []
@@ -322,7 +389,9 @@ def write_playbook_readmes(entries: list[tuple[str, str | None, list[str]]]) -> 
         if not folder.is_dir():
             continue
         readme = folder / "README.md"
-        readme.write_text(playbook_readme_body(pid, name or pid, mcp_ids), encoding="utf-8")
+        readme.write_text(
+            playbook_readme_body(pid, name or pid, mcp_ids, mcp_bridge), encoding="utf-8"
+        )
         written.append(readme)
 
     # Remove stale generated READMEs (playbook removed from catalog)
@@ -360,6 +429,11 @@ def main() -> None:
         action="store_true",
         help="Print markdown table to stdout (same as --write-docs but no file)",
     )
+    p.add_argument(
+        "--mcp-bridge",
+        metavar="HTTPS_ORIGIN",
+        help="Override catalog mcp_install_bridge for this run (e.g. https://org.github.io/repo — no trailing slash)",
+    )
     args = p.parse_args()
 
     if args.mcp_install:
@@ -367,19 +441,20 @@ def main() -> None:
         return
 
     if args.write_docs or args.print_all:
-        entries = parse_catalog(CATALOG)
+        catalog_bridge, entries = parse_catalog(CATALOG)
+        mcp_bridge = (args.mcp_bridge or catalog_bridge or "").strip().rstrip("/") or None
         flat_mcp: list[str] = []
         for _pid, _n, ids in entries:
             flat_mcp.extend(ids)
         validate_mcp_install_ids(flat_mcp)
-        body = markdown_buttons(entries)
+        body = markdown_buttons(entries, mcp_bridge)
         if args.print_all:
             print(body, end="")
         else:
             RUN_MD.parent.mkdir(parents=True, exist_ok=True)
             RUN_MD.write_text(body, encoding="utf-8")
             print(f"Wrote {RUN_MD}")
-            readmes = write_playbook_readmes(entries)
+            readmes = write_playbook_readmes(entries, mcp_bridge)
             for r in readmes:
                 print(f"Wrote {r}")
         return

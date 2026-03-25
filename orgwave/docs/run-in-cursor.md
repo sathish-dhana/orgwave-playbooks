@@ -1,7 +1,8 @@
 # Run in Cursor
 
 One click opens Cursor with a **prefilled prompt** for that playbook (you still confirm before it runs).
-Blue **Add to Cursor** opens the **[MCP install dialog](https://cursor.com/docs/context/mcp/install-links)** with this repo’s server definition (same as a setup page that prefills name, command, and env). **Open the `orgwave-playbooks` folder** in Cursor first so `${workspaceFolder}` in `command` / `args` resolves.
+**Add to Cursor** targets `cursor://` — that works in the **Cursor** app’s Markdown preview. **On github.com**, image badges are often opened via **Camo** and `cursor://` may not run; set **`mcp_install_bridge`** in **`orgwave/catalog.yaml`** to your **GitHub Pages** origin and regenerate (see **`docs/README.md`**), or use your org’s HTTPS install page the same way.
+**Open the `orgwave-playbooks` folder** in Cursor first so `${workspaceFolder}` in `command` / `args` resolves.
 
 | Playbook | Add to Cursor (MCP) | Run |
 |----------|---------------------|-----|
