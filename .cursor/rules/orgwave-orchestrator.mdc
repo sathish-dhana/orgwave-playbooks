@@ -40,12 +40,13 @@ Two common causes:
 
 ## Flow
 
-1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP is started via **`node orgwave/scripts/github-mcp-launch.mjs`**, which resolves a PAT (**`GITHUB_PERSONAL_ACCESS_TOKEN`** from **`.env`** if set; else default **`gh auth token`** before **`GITHUB_TOKEN`** / **`GH_TOKEN`** — see **`mcp-servers/README.md`**). Follow **MCP-first** and **GitHub MCP gate** in **`orgwave/required-mcp.md`**: playbooks that require GitHub MCP for listing/PR **stop** with setup steps when tools are missing or auth fails, until the user continues or opts out.
+1. Read `orgwave/required-mcp.md`, **`mcp-servers/README.md`**, and scan **`mcp-servers/servers/*.json`** (each optional **`_orgwave`** block describes env vars and purpose). **`.cursor/mcp.json`** is the merged Cursor config. GitHub MCP is started via **`node orgwave/scripts/github-mcp-launch.mjs`**, which resolves a PAT (**`GITHUB_PERSONAL_ACCESS_TOKEN`** from **`.env`** if set; **`~/.zshrc`** for still-empty keys; else default **`gh auth token`** before **`GITHUB_TOKEN`** / **`GH_TOKEN`** — see **`mcp-servers/README.md`**). Follow **MCP-first** and **GitHub MCP gate** in **`orgwave/required-mcp.md`**: playbooks that require GitHub MCP for listing/PR **stop** with setup steps when tools are missing or auth fails, until the user continues or opts out.
 2. Read `orgwave/catalog.yaml`. If no `id` was given, list `id`, `name`, `description` and ask for one.
-3. Follow `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
-4. Discovery: follow the playbook and **GitHub MCP gate** — use **`search_repositories`** when MCP tools exist and the playbook requires it; if MCP is missing after the gate, **`gh`** / REST / **`discovery-output.json`** only when the user has opted out or the playbook allows; do not embed MCP server commands in playbooks.
-5. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
-6. **One PR per selected service** unless the user agrees otherwise.
+3. Read **`## Prerequisites`** in `playbooks/<id>/SKILL.md` first. For each **MCP servers required** entry, confirm **`mcpServers.<id>`** exists in **`.cursor/mcp.json`**; if missing, **stop** with instructions to add **`mcp-servers/servers/<id>.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`**, reload Cursor, and enable the server. Confirm each required server is **enabled** in **Tools & MCP** before discovery — if not, **stop** and notify per **`orgwave/required-mcp.md`**. Honor **PAT / tokens** bullets (e.g. **`~/.zshrc`** for GitHub via the launcher).
+4. Follow the rest of `playbooks/<id>/SKILL.md` exactly (eligibility, discovery, execution, PR).
+5. Discovery: follow the playbook and **GitHub MCP gate** — use **`search_repositories`** when MCP tools exist and the playbook requires it; if MCP is missing after the gate, **`gh`** / REST / **`discovery-output.json`** only when the user has opted out or the playbook allows; do not embed MCP server commands in playbooks.
+6. **Gate:** finish discovery, then get **explicit** selection of services before any edits.
+7. **One PR per selected service** unless the user agrees otherwise.
 
 ## After discovery JSON
 

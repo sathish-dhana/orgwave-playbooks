@@ -6,11 +6,7 @@
       "args": [
         "${workspaceFolder}/orgwave/scripts/github-mcp-launch.mjs"
       ],
-      "envFile": "${workspaceFolder}/.env",
-      "env": {
-        "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
-        "GH_TOKEN": "${env:GH_TOKEN}"
-      }
+      "envFile": "${workspaceFolder}/.env"
     }
   }
 }

@@ -5,6 +5,12 @@ description: Test playbook — GitHub MCP for repo listing and PR only; gh/git f
 
 # README Cursor smoke test
 
+## Prerequisites
+
+- **MCP servers required:** **`github`** — **`search_repositories`** for discovery and **`create_pull_request`** for opening PRs whenever those tools exist in this session (see **Discovery** / **PR** for gates and opt-out).
+- **Enabled:** Before listing repos, confirm **`github`** appears under **Tools & MCP** and is **on**. If GitHub MCP tools are **missing** or **disabled**, **stop** and paste the checklist from **`orgwave/required-mcp.md`** → *GitHub MCP gate — checklist*. If **`github`** is absent from **`.cursor/mcp.json`**, tell the user to add **`mcp-servers/servers/github.json`**, run **`python3 orgwave/scripts/build-mcp-json.py`**, reload Cursor, enable **`github`**, then continue.
+- **PAT / tokens:** Put **`export GITHUB_TOKEN=…`** or **`GITHUB_PERSONAL_ACCESS_TOKEN`** in **`~/.zshrc`** (launcher loads it when keys are still empty), or use **repo `.env`**, **`~/.cursor/github-mcp.env`**, or **`gh auth login`** — see **`mcp-servers/README.md`**. If **`search_repositories`** or **`create_pull_request`** returns **401/403** after one retry, **stop** with the same gate (do not fall through to **`gh`** in that turn unless the user explicitly opts out).
+
 ## 1. Intent
 
 - **Change:** Append a single line to **`README.md`** at the repo root of each selected service: **`Updated by Cursor.`** (on its own line at the end of the file).

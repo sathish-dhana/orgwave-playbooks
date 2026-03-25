@@ -35,19 +35,15 @@ Full detail: **[orgwave/docs/reference.md](orgwave/docs/reference.md)**.
 
 ### Prerequisites — GitHub MCP (if you use it)
 
-`mcp-servers/servers/github.json` maps **`GITHUB_PERSONAL_ACCESS_TOKEN`** ← **`${env:GITHUB_TOKEN}`** and also loads optional repo-root **`.env`**. Cursor only sees variables from your **shell environment** if Cursor was started with that environment (e.g. from Terminal).
+**`github-mcp-launch.mjs`** sets **`GITHUB_PERSONAL_ACCESS_TOKEN`** for the server: repo **`.env`** (via **`envFile`**), then **`github-mcp.env`**, then **`~/.zshrc`** (non-interactive merge into **empty** keys), then **`gh auth token`** by default. **`servers/github.json`** does **not** pass **`${env:GITHUB_TOKEN}`** from Cursor so empty GUI env vars do not block **`zshrc`** merge.
 
-**Recommended — `~/.zshrc` + launch Cursor from the terminal:**
+**Recommended — token in `~/.zshrc`** (works even when Cursor was opened from the Dock):
 
 ```bash
 # 1) Add once (replace the token; keep the line secret — do not commit)
 echo 'export GITHUB_TOKEN="ghp_YOUR_TOKEN_HERE"' >> ~/.zshrc
 
-# 2) Load into the current shell
-source ~/.zshrc
-
-# 3) Start Cursor from this terminal so MCP inherits GITHUB_TOKEN (macOS Dock icon often does not)
-open -a Cursor /path/to/orgwave-playbooks
+# 2) Reload Cursor after editing zshrc, or open orgwave-playbooks and run a playbook — the launcher sources zshrc for the MCP child when keys are still empty
 ```
 
 **Optional — repo `.env` instead** (e.g. you always open Cursor from the Dock): copy **[`.env.example`](.env.example)** to **`.env`** at the repo root and set **`GITHUB_PERSONAL_ACCESS_TOKEN`**.

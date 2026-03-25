@@ -3,21 +3,16 @@
   "command": "node",
   "args": ["${workspaceFolder}/orgwave/scripts/github-mcp-launch.mjs"],
   "envFile": "${workspaceFolder}/.env",
-  "env": {
-    "GITHUB_TOKEN": "${env:GITHUB_TOKEN}",
-    "GH_TOKEN": "${env:GH_TOKEN}"
-  },
   "_orgwave": {
     "title": "GitHub",
     "purpose": "List/filter org repos and GitHub metadata during OrgWave discovery.",
     "env": [
-      "Optional: run `cd orgwave/mcp-runtime && npm ci` once for fast MCP startup (avoids slow npx cold install).",
-      "GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (envFile) — always wins when set.",
-      "Default PAT order after that: `gh auth token` (matches terminal gh), then GITHUB_TOKEN / GH_TOKEN. Stale Cursor-injected GITHUB_TOKEN no longer blocks gh. Set ORGWAVE_MCP_PREFER_ENV_TOKEN=1 in .env or github-mcp.env to prefer env tokens before gh.",
-      "~/.cursor/github-mcp.env or ~/.config/orgwave/github-mcp.env merges into empty keys only (even when Cursor passed an empty GITHUB_TOKEN).",
-      "~/.zshrc: launcher sources it (non-interactive) and fills GITHUB_* / GH_TOKEN only when still unset.",
-      "GITHUB_TOKEN or GH_TOKEN in the Cursor process env (e.g. launch Cursor from a terminal that exports them).",
-      "gh logged in: github-mcp-launch.mjs prepends Homebrew to PATH and runs `gh auth token` with stdin detached so MCP stdio is not consumed."
+      "No `env` block in this file: avoid empty GITHUB_TOKEN from Cursor expanding `${env:...}` into the MCP child. Tokens come from repo `.env` (envFile), launcher merge order, and `gh`.",
+      "~/.zshrc: `github-mcp-launch.mjs` sources it non-interactively and fills GITHUB_PERSONAL_ACCESS_TOKEN / GITHUB_TOKEN / GH_TOKEN only when those keys are still empty (typical Dock or Run-in-Cursor launches).",
+      "GITHUB_PERSONAL_ACCESS_TOKEN in repo-root `.env` (envFile) wins when set.",
+      "Then (unless ORGWAVE_MCP_PREFER_ENV_TOKEN=1): `gh auth token` (launcher prepends Homebrew PATH, stdin ignored so MCP stdio stays clean), then GITHUB_TOKEN / GH_TOKEN from the process.",
+      "~/.cursor/github-mcp.env or ~/.config/orgwave/github-mcp.env merges into empty keys only.",
+      "Optional: `cd orgwave/mcp-runtime && npm ci` once for fast MCP startup (avoids slow npx cold install)."
     ],
     "permissionsAllowlistHint": "github:*"
   }

@@ -5,6 +5,12 @@ description: Sample OrgWave playbook — discover via GitHub MCP, select repos, 
 
 # Example migration (POC)
 
+## Prerequisites
+
+- **MCP servers required:** **`github`** (recommended for discovery; optional if the user supplies **`discovery-output.json`** or explicitly uses **`gh`** only).
+- **Enabled:** If you use GitHub MCP for discovery, confirm **`github`** is **on** in **Tools & MCP** and GitHub tools are available in this session. If not, **stop** and notify the user per **`orgwave/required-mcp.md`** (enable server, PAT, reload). If **`github`** is missing from **`.cursor/mcp.json`**, instruct **`mcp-servers/servers/github.json`** + **`python3 orgwave/scripts/build-mcp-json.py`**, then reload and enable.
+- **PAT / tokens:** Prefer **`export GITHUB_TOKEN=…`** or **`GITHUB_PERSONAL_ACCESS_TOKEN`** in **`~/.zshrc`**, or **`gh auth login`**, so **`github-mcp-launch.mjs`** can authenticate — see **`mcp-servers/README.md`**.
+
 ## 1. Intent
 
 - **Change:** Add a small marker file to show the OrgWave flow.

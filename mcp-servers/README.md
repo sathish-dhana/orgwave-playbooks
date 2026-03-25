@@ -10,11 +10,11 @@ The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`n
 
 ### Merge phase (before choosing a PAT)
 
-Cursor passes **`envFile`** (repo **`.env`**) and **`env`** from **`servers/github.json`** (e.g. **`${env:GITHUB_TOKEN}`**) into the MCP process first. The launcher then:
+Cursor passes **`envFile`** (repo **`.env`**) into the MCP process. **`servers/github.json`** intentionally has **no** **`env`** block with **`${env:GITHUB_TOKEN}`** so Cursor does not inject **empty** token vars that would block **`github-mcp.env`** / **`.zshrc`** merge. The launcher then:
 
 1. **Prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so **`gh`** is found.
-2. **Reads** **`~/.cursor/github-mcp.env`** and **`~/.config/orgwave/github-mcp.env`** and sets **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`GITHUB_TOKEN`**, **`GH_TOKEN`**, and **`ORGWAVE_MCP_PREFER_ENV_TOKEN`** only for keys that are **still empty** — so a blank **`GITHUB_TOKEN`** from Cursor does not skip these files anymore.
-3. **Sources** **`~/.zshrc`** (macOS/Linux, non-interactive) and copies the same three token vars only where **still empty**. Avoid noisy **`echo`** on non-interactive source (can break the probe). **`export GITHUB_TOKEN=...`** in **`.zshrc`** still helps when nothing else set a value.
+2. **Reads** **`~/.cursor/github-mcp.env`** and **`~/.config/orgwave/github-mcp.env`** and sets **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`GITHUB_TOKEN`**, **`GH_TOKEN`**, and **`ORGWAVE_MCP_PREFER_ENV_TOKEN`** only for keys that are **still empty**.
+3. **Sources** **`~/.zshrc`** (macOS/Linux, non-interactive) and copies the same three token vars only where **still empty**. Avoid noisy **`echo`** on non-interactive source (can break the probe). **`export GITHUB_TOKEN=...`** in **`.zshrc`** is the usual fix when Cursor was started from the Dock and has no token in its own environment.
 
 ### Which credential wins
 
