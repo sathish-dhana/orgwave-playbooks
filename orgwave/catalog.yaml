@@ -6,4 +6,4 @@ playbooks:
     description: Sample flow — marker file + PR; copy _template for real migrations.
   - id: readme-cursor-smoke-test
     name: README Cursor smoke test
-    description: Test flow — list push-capable repos (GitHub MCP/gh), pick services, append “Updated by Cursor.” to README via PR.
+    description: Test flow — list repos via GitHub MCP (search); gh/git for README branch+push; MCP create_pull_request; pick targets, one PR per repo.
