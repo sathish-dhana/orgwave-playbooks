@@ -18,4 +18,18 @@ OrgWave: open orgwave-playbooks as workspace. Run orchestrator rule and playbook
 
 ---
 
-*Auto-generated from `orgwave/catalog.yaml` — do not edit. Regenerate with* `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*
+*Auto-generated from `orgwave/catalog.yaml` — do not edit the block above by hand. Regenerate with* `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*
+
+## Terminal: GitHub PAT only (repo `.env`)
+
+This playbook uses **GitHub MCP** only. From the **repo root**:
+
+```bash
+cd /path/to/orgwave-playbooks
+umask 077
+cat >> .env << 'EOF'
+GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_github_pat
+EOF
+```
+
+Alternatives: **`~/.cursor/github-mcp.env`**, **`gh auth login`**, or **`~/.zshrc`** `GITHUB_TOKEN` — see **[mcp-servers/README.md](../../mcp-servers/README.md)**. Reload Cursor after editing.

@@ -18,4 +18,19 @@ OrgWave: open orgwave-playbooks as workspace. Run orchestrator rule and playbook
 
 ---
 
-*Auto-generated from `orgwave/catalog.yaml` — do not edit. Regenerate with* `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*
+*Auto-generated from `orgwave/catalog.yaml` — do not edit the block above by hand. Regenerate with* `python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*
+
+## Terminal: Confluence email and token (repo `.env`)
+
+**`CONFLUENCE_BASE_URL`** is pinned in **`mcp-servers/servers/confluence.json`** (`https://confluence.myntracorp.com/`). From the **repo root**, append **email** and **token** only (replace placeholders):
+
+```bash
+cd /path/to/orgwave-playbooks
+umask 077
+cat >> .env << 'EOF'
+CONFLUENCE_USER_EMAIL=you@myntracorp.com
+CONFLUENCE_API_TOKEN=your_confluence_personal_access_token
+EOF
+```
+
+Then **`python3 orgwave/scripts/build-mcp-json.py`** if you changed server JSON, **Developer: Reload Window**, and enable **`confluence`** under Tools & MCP. Details: **[mcp-servers/README.md](../../mcp-servers/README.md)**.

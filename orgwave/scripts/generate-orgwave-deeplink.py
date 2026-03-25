@@ -131,9 +131,54 @@ def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
     return "\n".join(lines) + "\n"
 
 
+def playbook_readme_env_section(playbook_id: str) -> str:
+    """Extra markdown appended to generated README — terminal snippets for `.env` setup."""
+    if playbook_id == "confluence-service-doc":
+        return "\n".join(
+            [
+                "## Terminal: Confluence email and token (repo `.env`)",
+                "",
+                "**`CONFLUENCE_BASE_URL`** is pinned in **`mcp-servers/servers/confluence.json`** (`https://confluence.myntracorp.com/`). From the **repo root**, append **email** and **token** only (replace placeholders):",
+                "",
+                "```bash",
+                "cd /path/to/orgwave-playbooks",
+                "umask 077",
+                "cat >> .env << 'EOF'",
+                "CONFLUENCE_USER_EMAIL=you@myntracorp.com",
+                "CONFLUENCE_API_TOKEN=your_confluence_personal_access_token",
+                "EOF",
+                "```",
+                "",
+                "Then **`python3 orgwave/scripts/build-mcp-json.py`** if you changed server JSON, **Developer: Reload Window**, and enable **`confluence`** under Tools & MCP. Details: **[mcp-servers/README.md](../../mcp-servers/README.md)**.",
+                "",
+            ]
+        )
+    if playbook_id == "readme-cursor-smoke-test":
+        return "\n".join(
+            [
+                "## Terminal: GitHub PAT only (repo `.env`)",
+                "",
+                "This playbook uses **GitHub MCP** only. From the **repo root**:",
+                "",
+                "```bash",
+                "cd /path/to/orgwave-playbooks",
+                "umask 077",
+                "cat >> .env << 'EOF'",
+                "GITHUB_PERSONAL_ACCESS_TOKEN=ghp_your_github_pat",
+                "EOF",
+                "```",
+                "",
+                "Alternatives: **`~/.cursor/github-mcp.env`**, **`gh auth login`**, or **`~/.zshrc`** `GITHUB_TOKEN` — see **[mcp-servers/README.md](../../mcp-servers/README.md)**. Reload Cursor after editing.",
+                "",
+            ]
+        )
+    return ""
+
+
 def playbook_readme_body(playbook_id: str, title: str) -> str:
     badge = run_in_cursor_badge(web_url(playbook_id))
     paste_fallback = build_prompt(playbook_id)
+    extra = playbook_readme_env_section(playbook_id)
     return "\n".join(
         [
             README_MARKER,
@@ -156,9 +201,10 @@ def playbook_readme_body(playbook_id: str, title: str) -> str:
             "",
             "---",
             "",
-            "*Auto-generated from `orgwave/catalog.yaml` — do not edit. Regenerate with* "
+            "*Auto-generated from `orgwave/catalog.yaml` — do not edit the block above by hand. Regenerate with* "
             "`python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs`*.*",
             "",
+            extra,
         ]
     )
 

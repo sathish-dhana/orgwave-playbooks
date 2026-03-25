@@ -8,7 +8,7 @@ description: User provides a service name; create a minimal Confluence page with
 ## New here? Confluence MCP in this repo
 
 1. **Pinned server:** **`mcp-servers/servers/confluence.json`** is merged into **`.cursor/mcp.json`** with the rest of the servers. One-time install: **`cd orgwave/mcp-confluence-runtime && npm ci`** (see [mcp-servers/README.md](../../mcp-servers/README.md) → *Confluence*).
-2. Set **`CONFLUENCE_BASE_URL`**, **`CONFLUENCE_USER_EMAIL`**, **`CONFLUENCE_API_TOKEN`** in repo-root **`.env`** ([`.env.example`](../../.env.example)).
+2. **`CONFLUENCE_BASE_URL`** is set in **`mcp-servers/servers/confluence.json`** (`https://confluence.myntracorp.com/`). Set **`CONFLUENCE_USER_EMAIL`** and **`CONFLUENCE_API_TOKEN`** in repo-root **`.env`** ([`.env.example`](../../.env.example)); terminal one-liners are in this folder’s **[README.md](README.md)**.
 3. Reload Cursor, enable **`confluence`** under **Tools & MCP**. If tools or auth fail, **[orgwave/required-mcp.md](../../orgwave/required-mcp.md)**.
 
 ---

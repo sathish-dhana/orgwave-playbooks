@@ -6,6 +6,9 @@
       "args": [
         "${workspaceFolder}/orgwave/mcp-confluence-runtime/node_modules/@answerai/confluence-mcp/build/index.js"
       ],
+      "env": {
+        "CONFLUENCE_BASE_URL": "https://confluence.myntracorp.com/"
+      },
       "envFile": "${workspaceFolder}/.env"
     },
     "github": {

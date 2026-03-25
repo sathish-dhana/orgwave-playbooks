@@ -55,15 +55,15 @@ The **`confluence`** entry uses a **pinned** copy of [**`@answerai/confluence-mc
 cd orgwave/mcp-confluence-runtime && npm ci
 ```
 
-**Secrets** (repo **`.env`**, loaded via **`envFile`** in **`servers/confluence.json`** — never commit values):
+**Secrets** (repo **`.env`**, loaded via **`envFile`** in **`servers/confluence.json`** — never commit values). In **this** repo, **`CONFLUENCE_BASE_URL`** is **pinned** in **`servers/confluence.json`** (`https://confluence.myntracorp.com/`); you normally set only email and token in **`.env`**.
 
 | Variable | Role |
 |----------|------|
-| **`CONFLUENCE_BASE_URL`** | Cloud: `https://<site>.atlassian.net/wiki`. Server/DC: your site base (include **`/wiki`** if your install uses it). |
-| **`CONFLUENCE_USER_EMAIL`** | Atlassian account email for the API token. |
-| **`CONFLUENCE_API_TOKEN`** | Create at [Atlassian API tokens](https://id.atlassian.com/manage-profile/security/api-tokens). |
+| **`CONFLUENCE_BASE_URL`** | In **`servers/confluence.json`** → **`env`** for OrgWave default. Else Cloud: `https://<site>.atlassian.net/wiki`; Server/DC: your site base. |
+| **`CONFLUENCE_USER_EMAIL`** | Account email for the Confluence API / PAT. |
+| **`CONFLUENCE_API_TOKEN`** | Confluence personal access token or (Cloud) [Atlassian API token](https://id.atlassian.com/manage-profile/security/api-tokens). |
 
-Copy **[`.env.example`](../.env.example)** placeholders, reload Cursor, enable **`confluence`** under **Tools & MCP**.
+Copy **[`.env.example`](../.env.example)** placeholders, reload Cursor, enable **`confluence`** under **Tools & MCP**. Terminal snippets: **[`playbooks/confluence-service-doc/README.md`](../playbooks/confluence-service-doc/README.md)**.
 
 ### Recommended: `GITHUB_TOKEN` + `~/.zshrc`
 
