@@ -48,7 +48,7 @@ echo 'export GITHUB_TOKEN="ghp_YOUR_TOKEN_HERE"' >> ~/.zshrc
 
 **Optional — repo `.env` instead** (e.g. you always open Cursor from the Dock): copy **[`.env.example`](.env.example)** to **`.env`** at the repo root and set **`GITHUB_PERSONAL_ACCESS_TOKEN`**.
 
-**Confluence MCP** (optional, for **`confluence-service-doc`**): one-time **`cd orgwave/mcp-confluence-runtime && npm ci`**, then set **`CONFLUENCE_BASE_URL`**, **`CONFLUENCE_USER_EMAIL`**, and **`CONFLUENCE_API_TOKEN`** in **`.env`** (see **`.env.example`**). Enable **`confluence`** under **Tools & MCP**.
+**Confluence MCP** (optional, for **`confluence-service-doc`**): one-time **`cd orgwave/mcp-confluence-runtime && npm ci`**, then set **`CONFLUENCE_USER_EMAIL`** and **`CONFLUENCE_API_TOKEN`** ( **`CONFLUENCE_BASE_URL`** is pinned in server JSON unless you override). **Recommended — same pattern as GitHub:** `export` them in **`~/.zshrc`** or use **`~/.cursor/confluence-mcp.env`** so deep links work without repo **`.env`** — see **[playbooks/confluence-service-doc/README.md](playbooks/confluence-service-doc/README.md)** (terminal) or **`.env.example`**. Enable **`confluence`** under **Tools & MCP**.
 
 More detail: **[mcp-servers/README.md](mcp-servers/README.md)** · **`orgwave/required-mcp.md`**.
 

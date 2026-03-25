@@ -54,7 +54,7 @@ Add **`mcp-servers/servers/<new-id>.json`**, run **`build-mcp-json.py`**, and do
 
 | Server | Definition | Purpose |
 |--------|------------|---------|
-| **Confluence** | `mcp-servers/servers/confluence.json` | Confluence pages via **`@answerai/confluence-mcp`**; run **`cd orgwave/mcp-confluence-runtime && npm ci`** once. Env: **`CONFLUENCE_BASE_URL`**, **`CONFLUENCE_USER_EMAIL`**, **`CONFLUENCE_API_TOKEN`** in **`.env`**. |
+| **Confluence** | `mcp-servers/servers/confluence.json` | Confluence pages via **`confluence-mcp-launch.mjs`** → **`@answerai/confluence-mcp`**; run **`cd orgwave/mcp-confluence-runtime && npm ci`** once. Credentials: repo **`.env`**, or **`~/.cursor/confluence-mcp.env`** / **`~/.config/orgwave/confluence-mcp.env`**, or **`~/.zshrc`** (see **`mcp-servers/README.md`**). |
 
 ## Rules for playbooks
 

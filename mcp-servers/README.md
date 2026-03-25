@@ -55,7 +55,9 @@ The **`confluence`** entry uses a **pinned** copy of [**`@answerai/confluence-mc
 cd orgwave/mcp-confluence-runtime && npm ci
 ```
 
-**Secrets** (repo **`.env`**, loaded via **`envFile`** in **`servers/confluence.json`** — never commit values). In **this** repo, **`CONFLUENCE_BASE_URL`** is **pinned** in **`servers/confluence.json`** (`https://confluence.myntracorp.com/`); you normally set only email and token in **`.env`**.
+**Launch:** **`orgwave/scripts/confluence-mcp-launch.mjs`** (merged into **`.cursor/mcp.json`** from **`servers/confluence.json`**). Cursor applies **`env`** + repo **`envFile`** (`.env`) first; the launcher then fills **only empty** keys from **`~/.cursor/confluence-mcp.env`**, **`~/.config/orgwave/confluence-mcp.env`**, and from **`~/.zshrc`** (non-interactive source — same idea as GitHub MCP for Dock / deep links). It does **not** write **`.env`**.
+
+**Secrets** — never commit values. In **this** repo, **`CONFLUENCE_BASE_URL`** is **pinned** in **`servers/confluence.json`** (`https://confluence.myntracorp.com/`); you normally set only email and token in **`.env`**, a user **`confluence-mcp.env`**, or **`export`** in **`~/.zshrc`**.
 
 | Variable | Role |
 |----------|------|
@@ -63,7 +65,9 @@ cd orgwave/mcp-confluence-runtime && npm ci
 | **`CONFLUENCE_USER_EMAIL`** | Account email for the Confluence API / PAT. |
 | **`CONFLUENCE_API_TOKEN`** | Confluence personal access token or (Cloud) [Atlassian API token](https://id.atlassian.com/manage-profile/security/api-tokens). |
 
-Copy **[`.env.example`](../.env.example)** placeholders, reload Cursor, enable **`confluence`** under **Tools & MCP**. Terminal snippets: **[`playbooks/confluence-service-doc/README.md`](../playbooks/confluence-service-doc/README.md)**.
+Copy **[`.env.example`](../.env.example)** for repo **`.env`**, or follow the **`~/.zshrc`** terminal snippet in **[`playbooks/confluence-service-doc/README.md`](../playbooks/confluence-service-doc/README.md)**. Reload Cursor, enable **`confluence`** under **Tools & MCP**.
+
+**Prefer not to put long-lived tokens in `~/.zshrc`?** Use **`~/.cursor/confluence-mcp.env`** (same pattern as **`github-mcp.env`**).
 
 ### Recommended: `GITHUB_TOKEN` + `~/.zshrc`
 

@@ -132,24 +132,27 @@ def markdown_buttons(entries: list[tuple[str, str | None]]) -> str:
 
 
 def playbook_readme_env_section(playbook_id: str) -> str:
-    """Extra markdown appended to generated README — terminal snippets for `.env` setup."""
+    """Extra markdown appended to generated README — terminal snippets (zshrc / .env)."""
     if playbook_id == "confluence-service-doc":
         return "\n".join(
             [
-                "## Terminal: Confluence email and token (repo `.env`)",
+                "## Terminal: Confluence email and token (`~/.zshrc`)",
                 "",
-                "**`CONFLUENCE_BASE_URL`** is pinned in **`mcp-servers/servers/confluence.json`** (`https://confluence.myntracorp.com/`). From the **repo root**, append **email** and **token** only (replace placeholders):",
+                "**`CONFLUENCE_BASE_URL`** is pinned in **`mcp-servers/servers/confluence.json`** (`https://confluence.myntracorp.com/`). **`confluence-mcp-launch.mjs`** sources **`~/.zshrc`** when repo **`.env`** does not set these vars (good for Dock / deep links). Append **email** and **token** once (replace placeholders). Same rule as GitHub MCP: keep **`~/.zshrc`** from printing to stdout on non-interactive load (stray **`echo`** can break the launcher’s probe):",
                 "",
                 "```bash",
-                "cd /path/to/orgwave-playbooks",
                 "umask 077",
-                "cat >> .env << 'EOF'",
-                "CONFLUENCE_USER_EMAIL=you@myntracorp.com",
-                "CONFLUENCE_API_TOKEN=your_confluence_personal_access_token",
+                "cat >> ~/.zshrc <<'EOF'",
+                "",
+                "# OrgWave Confluence MCP — do not commit this file",
+                'export CONFLUENCE_USER_EMAIL="you@myntracorp.com"',
+                'export CONFLUENCE_API_TOKEN="your_confluence_personal_access_token"',
                 "EOF",
                 "```",
                 "",
-                "Then **`python3 orgwave/scripts/build-mcp-json.py`** if you changed server JSON, **Developer: Reload Window**, and enable **`confluence`** under Tools & MCP. Details: **[mcp-servers/README.md](../../mcp-servers/README.md)**.",
+                "Then **`source ~/.zshrc`** (optional), **Developer: Reload Window**, and enable **`confluence`** under Tools & MCP. Run **`python3 orgwave/scripts/build-mcp-json.py`** only if you changed **`mcp-servers/servers/*.json`**.",
+                "",
+                "**Optional — repo `.env` instead:** same variable names in **`.env`** at the repo root (see **[`.env.example`](../../.env.example)**). **Alternatively:** **`~/.cursor/confluence-mcp.env`** — see **[mcp-servers/README.md](../../mcp-servers/README.md)**.",
                 "",
             ]
         )

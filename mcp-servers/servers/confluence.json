@@ -1,9 +1,7 @@
 {
   "type": "stdio",
   "command": "node",
-  "args": [
-    "${workspaceFolder}/orgwave/mcp-confluence-runtime/node_modules/@answerai/confluence-mcp/build/index.js"
-  ],
+  "args": ["${workspaceFolder}/orgwave/scripts/confluence-mcp-launch.mjs"],
   "env": {
     "CONFLUENCE_BASE_URL": "https://confluence.myntracorp.com/"
   },
@@ -12,9 +10,9 @@
     "title": "Confluence",
     "purpose": "Create and update Confluence pages (e.g. playbook confluence-service-doc).",
     "env": [
-      "CONFLUENCE_BASE_URL — pinned in this file (https://confluence.myntracorp.com/).",
-      "CONFLUENCE_USER_EMAIL — set in repo-root `.env` (envFile).",
-      "CONFLUENCE_API_TOKEN — Confluence personal access token or API token; set in repo-root `.env`. Same file as GitHub PAT is fine."
+      "Launched via `orgwave/scripts/confluence-mcp-launch.mjs` (same deep-link pattern as GitHub).",
+      "CONFLUENCE_BASE_URL — pinned in this file unless set earlier (e.g. repo `.env`).",
+      "CONFLUENCE_USER_EMAIL / CONFLUENCE_API_TOKEN — repo-root `.env` (envFile), or `~/.cursor/confluence-mcp.env` / `~/.config/orgwave/confluence-mcp.env`, or `export` them in `~/.zshrc` (filled only when still empty after `.env`)."
     ],
     "permissionsAllowlistHint": "confluence:*"
   }
