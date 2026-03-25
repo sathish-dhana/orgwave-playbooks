@@ -10,11 +10,21 @@ The **github** server runs **`orgwave/scripts/github-mcp-launch.mjs`** (via **`n
 
 1. Already set (e.g. repo-root **`.env`** via **`envFile`** — copy **`.env.example`**).
 2. **User env file** (only if no token yet): **`~/.cursor/github-mcp.env`** or **`~/.config/orgwave/github-mcp.env`** — one line per variable, e.g. `GITHUB_PERSONAL_ACCESS_TOKEN=ghp_...` or `GITHUB_TOKEN=...`. Use this when you open Cursor from the **Dock** or the GitHub **Run in Cursor** link (those paths do not load **`~/.zshrc`** into Cursor’s process).
-3. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
-4. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
-5. **`gh auth token`** if `gh` is installed and logged in. The launcher **prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so `gh` is found even when the MCP child’s **`PATH`** is minimal.
+3. **`~/.zshrc`** (macOS/Linux only, only if still no token): the launcher runs **`zsh`** and **sources** **`~/.zshrc`** non-interactively, then copies **`GITHUB_PERSONAL_ACCESS_TOKEN`**, **`GITHUB_TOKEN`**, and **`GH_TOKEN`** into the MCP process if they were set there. Keep **`export GITHUB_TOKEN=...`** (or PAT) in **`.zshrc`** so Dock-launched Cursor still gets a token. If **`.zshrc`** prints to stdout (e.g. `echo`), JSON parsing can fail — avoid noisy output on non-interactive source.
+4. **`GITHUB_TOKEN`** passed from the Cursor process (`${env:GITHUB_TOKEN}` in `servers/github.json`).
+5. **`GH_TOKEN`** (same idea as the GitHub CLI — often set when using `gh` in automation).
+6. **`gh auth token`** if `gh` is installed and logged in. The launcher **prepends** **`/opt/homebrew/bin`** and **`/usr/local/bin`** to **`PATH`** so `gh` is found even when the MCP child’s **`PATH`** is minimal.
 
-So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, **`~/.cursor/github-mcp.env`**, export **`GITHUB_TOKEN`** / **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+So **“`gh` works but GitHub MCP says Authentication Failed”** usually means none of the above were visible to the MCP child; fix with **`.env`**, **`~/.cursor/github-mcp.env`**, **`export`** in **`~/.zshrc`** (now picked up by the launcher), export **`GITHUB_TOKEN`** / **`GH_TOKEN`** before starting Cursor, or rely on **`gh auth login`** after this wrapper is in place.
+
+### “Authentication Failed” vs “no permission”
+
+| What you see | Typical meaning |
+|--------------|-----------------|
+| **Requires authentication** / **401** | GitHub did not get a **valid token** (missing, expired, or wrong). The API is not rejecting your PAT because it disallows writes in general — it often means **no credential** reached the server. |
+| **Forbidden** / **403** / insufficient access | A token **was** accepted, but it **lacks scope** or **repo access** (e.g. read-only fine-grained token, or not a collaborator). Create a PAT with **repo** (classic) or **Contents**/**Pull requests** (fine-grained) for that repository. |
+
+Reads on **public** repos can succeed **without** a token (rate-limited); **branches, file updates, and PRs** always need a valid token — so MCP can look fine for **`get_file_contents`** and then fail on **`create_branch`** / **`create_pull_request`** until a PAT is wired as above.
 
 ### Pinned install (recommended — faster connect)
 

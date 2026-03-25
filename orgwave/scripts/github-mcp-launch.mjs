@@ -17,6 +17,69 @@ const runtimeEntry = path.join(
   "orgwave/mcp-runtime/node_modules/@modelcontextprotocol/server-github/dist/index.js"
 );
 
+const GITHUB_TOKEN_KEYS = [
+  "GITHUB_PERSONAL_ACCESS_TOKEN",
+  "GITHUB_TOKEN",
+  "GH_TOKEN",
+];
+
+function hasAnyGithubPatHint() {
+  return GITHUB_TOKEN_KEYS.some((k) => process.env[k]?.trim());
+}
+
+/** POSIX single-quoted shell word for an arbitrary string. */
+function shSingleQuote(s) {
+  return `'${s.replace(/'/g, `'\"'\"'`)}'`;
+}
+
+/**
+ * Cursor started from Dock / deeplinks often inherits no shell profile. If the user exports
+ * GITHUB_TOKEN only in ~/.zshrc, source that file (non-interactive; stderr/stdout noise ignored)
+ * and copy token vars into this process before falling back to `gh auth token`.
+ */
+function loadGithubTokensFromZshrc() {
+  if (hasAnyGithubPatHint()) return;
+  if (process.platform === "win32") return;
+  const home = process.env.HOME;
+  if (!home) return;
+  const zshrc = path.join(home, ".zshrc");
+  try {
+    if (!fs.statSync(zshrc).isFile()) return;
+  } catch {
+    return;
+  }
+  const zshBin = fs.existsSync("/bin/zsh")
+    ? "/bin/zsh"
+    : fs.existsSync("/usr/bin/zsh")
+      ? "/usr/bin/zsh"
+      : null;
+  if (!zshBin) return;
+  const nodeProbe = String.raw`const k=["GITHUB_PERSONAL_ACCESS_TOKEN","GITHUB_TOKEN","GH_TOKEN"];const o={};for(const x of k){const v=process.env[x];if(v&&String(v).trim())o[x]=String(v).trim();}process.stdout.write(JSON.stringify(o));`;
+  const probe = [
+    "set +e;",
+    `[ -r ${shSingleQuote(zshrc)} ] && . ${shSingleQuote(zshrc)} 2>/dev/null;`,
+    `${shSingleQuote(process.execPath)} -e ${shSingleQuote(nodeProbe)}`,
+  ].join(" ");
+  try {
+    const out = execFileSync(zshBin, ["-c", probe], {
+      encoding: "utf8",
+      maxBuffer: 64 * 1024,
+      env: { ...process.env, HOME: home },
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+    if (!out) return;
+    const parsed = JSON.parse(out);
+    for (const k of GITHUB_TOKEN_KEYS) {
+      const v = parsed[k];
+      if (v && String(v).trim() && !process.env[k]?.trim()) {
+        process.env[k] = String(v).trim();
+      }
+    }
+  } catch {
+    /* .zshrc may write to stdout or be incompatible with non-interactive source */
+  }
+}
+
 /** Cursor opened from Dock / GitHub “Run in Cursor” often has a minimal PATH — gh lives in Homebrew. */
 function ensureMcpPath() {
   const extra = ["/opt/homebrew/bin", "/usr/local/bin"].filter((d) => {
@@ -39,11 +102,7 @@ function ensureMcpPath() {
  * (one-time setup) so GitHub MCP still authenticates after “Run in Cursor” from GitHub.
  */
 function loadUserGithubMcpEnvFile() {
-  if (
-    process.env.GITHUB_PERSONAL_ACCESS_TOKEN?.trim() ||
-    process.env.GITHUB_TOKEN?.trim() ||
-    process.env.GH_TOKEN?.trim()
-  ) {
+  if (hasAnyGithubPatHint()) {
     return;
   }
   const home = process.env.HOME || process.env.USERPROFILE;
@@ -76,11 +135,7 @@ function loadUserGithubMcpEnvFile() {
       const key = m[1];
       if (!process.env[key]?.trim()) process.env[key] = val;
     }
-    if (
-      process.env.GITHUB_PERSONAL_ACCESS_TOKEN?.trim() ||
-      process.env.GITHUB_TOKEN?.trim() ||
-      process.env.GH_TOKEN?.trim()
-    ) {
+    if (hasAnyGithubPatHint()) {
       break;
     }
   }
@@ -128,6 +183,7 @@ function forwardExit(child) {
 
 ensureMcpPath();
 loadUserGithubMcpEnvFile();
+loadGithubTokensFromZshrc();
 resolvePat();
 
 if (fs.existsSync(runtimeEntry)) {

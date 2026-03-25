@@ -26,7 +26,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 
 | Step | Why |
 |------|-----|
-| **Secrets** | **GitHub:** repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`~/.cursor/github-mcp.env`** / **`~/.config/orgwave/github-mcp.env`** (same vars) when Cursor was not started from a shell, or **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process (e.g. **`~/.zshrc`** + launch from that terminal), or **`gh auth login`** — **`orgwave/scripts/github-mcp-launch.mjs`** maps these to the PAT the MCP server needs (see **`mcp-servers/README.md`**). Deeplinks cannot inject tokens. |
+| **Secrets** | **GitHub:** repo **`.env`** with **`GITHUB_PERSONAL_ACCESS_TOKEN`**, or **`~/.cursor/github-mcp.env`** / **`~/.config/orgwave/github-mcp.env`** (same vars) when Cursor was not started from a shell, or **`export`** in **`~/.zshrc`** (the launcher **sources** **`~/.zshrc`** when those vars are still unset — see **`mcp-servers/README.md`**), or **`GITHUB_TOKEN`** / **`GH_TOKEN`** in the Cursor process, or **`gh auth login`** — **`orgwave/scripts/github-mcp-launch.mjs`** maps these to the PAT the MCP server needs. Deeplinks cannot inject tokens. |
 | **Pinned GitHub MCP** | Once per clone: **`cd orgwave/mcp-runtime && npm ci`** so the launcher spawns the pinned server with **`node`** (fast). Without it, **`npx`** cold starts may be slow enough that Cursor shows **empty offerings** / **Client closed** until retry. |
 | **Reload** | After changing **`mcp.json`**, reload Cursor or restart if tools do not appear. |
 | **Tool approval** | Cursor may prompt per tool; the agent should **fall back to `gh`** rather than block if MCP stalls. |
@@ -34,7 +34,7 @@ OrgWave is designed so **discovery and playbooks keep going** even if MCP is dow
 
 ### If you already set tokens — is it “auto”?
 
-When repo **`.env`**, **`~/.cursor/github-mcp.env`**, **`GITHUB_TOKEN`**, **`GH_TOKEN`**, or **`gh auth token`** (after **`gh auth login`**, with Homebrew on **`PATH`**) reaches the MCP child, GitHub MCP can authenticate. The macOS **Dock** icon and **Run in Cursor** from GitHub often do **not** load **`~/.zshrc`** — use **`.env`**, **`~/.cursor/github-mcp.env`**, **`open -a Cursor …`** from a shell that exports the token, or a logged-in **`gh`** so **`github-mcp-launch.mjs`** can supply a PAT.
+When repo **`.env`**, **`~/.cursor/github-mcp.env`**, tokens from **`~/.zshrc`** (via launcher source), **`GITHUB_TOKEN`**, **`GH_TOKEN`**, or **`gh auth token`** (after **`gh auth login`**, with Homebrew on **`PATH`**) reaches the MCP child, GitHub MCP can authenticate. The macOS **Dock** icon and **Run in Cursor** from GitHub often do **not** load **`~/.zshrc`** into Cursor’s GUI — the launcher still **sources** **`~/.zshrc`** for the GitHub MCP child when needed; alternatively use **`.env`**, **`~/.cursor/github-mcp.env`**, or **`open -a Cursor …`** from a shell that exports the token.
 
 ### Can Auto-run be set from a prompt / this repo?
 

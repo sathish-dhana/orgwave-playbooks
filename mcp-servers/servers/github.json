@@ -14,7 +14,8 @@
       "Optional: run `cd orgwave/mcp-runtime && npm ci` once for fast MCP startup (avoids slow npx cold install).",
       "GITHUB_PERSONAL_ACCESS_TOKEN in repo-root .env (envFile), or",
       "~/.cursor/github-mcp.env or ~/.config/orgwave/github-mcp.env (GITHUB_PERSONAL_ACCESS_TOKEN=... or GITHUB_TOKEN=...) when Cursor was opened from Dock/GitHub Run-in-Cursor (no shell profile), or",
-      "GITHUB_TOKEN or GH_TOKEN in the Cursor process env (e.g. ~/.zshrc + launch Cursor from that terminal), or",
+      "~/.zshrc: launcher sources it (non-interactive) and imports GITHUB_PERSONAL_ACCESS_TOKEN / GITHUB_TOKEN / GH_TOKEN when still unset, or",
+      "GITHUB_TOKEN or GH_TOKEN in the Cursor process env (e.g. launch Cursor from a terminal that exports them), or",
       "gh logged in (github-mcp-launch.mjs prepends Homebrew to PATH and runs `gh auth token` with stdin detached so MCP stdio is not consumed)"
     ],
     "permissionsAllowlistHint": "github:*"

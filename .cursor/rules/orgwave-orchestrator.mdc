@@ -20,6 +20,7 @@ Playbooks live in `playbooks/<id>/SKILL.md` and are listed in `orgwave/catalog.y
 2. **Prefer MCP** for any step that has a matching tool (e.g. **`search_repositories`**, **`get_file_contents`**, **`create_branch`**, **`create_or_update_file`**, **`create_pull_request`**, **`push_files`**). Do **not** open a shell to duplicate the same GitHub operation when an MCP tool covers it.
 3. **Discovery / push filter:** `@modelcontextprotocol/server-github` does **not** expose authenticated **`GET /user/repos`** with `permissions.push`. For a **push-only** candidate list, you may still use **`gh`** or **REST + `GITHUB_TOKEN`** after MCP attempts, or combine MCP **`search_repositories`** (e.g. `user:<login>`) with a clear note if push metadata is incomplete. Never block waiting for a non-existent MCP tool.
 4. **On MCP failure** (timeout, auth error, user skipped tool approval): retry once if reasonable, then fall back per policy—do not loop on MCP.
+5. **GitHub errors:** **`Requires authentication` / 401** usually means **no valid token** reached the API (not “PATs are forbidden to write”). **`403` / insufficient access** means the token is present but **lacks repo scope** or **collaborator access**. Public-repo **reads** may work without a token; **writes** (branch, file, PR) require a PAT — see **`mcp-servers/README.md`** (*Authentication Failed vs no permission*). **`github-mcp-launch.mjs`** sources **`~/.zshrc`** for **`GITHUB_*`** when other env paths did not set a token.
 
 ### GitHub CLI (`gh`) — when the agent says it is “not available”
 
