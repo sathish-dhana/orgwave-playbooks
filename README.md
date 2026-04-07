@@ -77,3 +77,4 @@ python3 orgwave/scripts/generate-orgwave-deeplink.py --write-docs --mcp-bridge h
 - **github.com** does not run Cursor, MCP, or an LLM — execution is in **Cursor** (or your own tooling).
 - **Deeplinks** prefill a prompt; [they do not auto-execute](https://cursor.com/docs/reference/deeplinks).
 - **Do not merge** automated PRs without service-owner review unless your policy says otherwise.
+Updated by Cursor.
